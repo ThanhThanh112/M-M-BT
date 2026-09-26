@@ -1,0 +1,1093 @@
+<!DOCTYPE html>
+<html lang="vi" class="h-full">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>M&M's Global Top Markets - 3D Interactive Slide</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Three.js for 3D Earth visualization -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <!-- Tone.js for synthesized presentation sound effects -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.min.js"></script>
+  <!-- PptxGenJS library for client-side PowerPoint generation -->
+  <script src="https://cdn.jsdelivr.net/npm/pptxgenjs@3.12.0/dist/pptxgen.bundle.js"></script>
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800;900&family=Paytone+One&display=swap" rel="stylesheet">
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            mm: {
+              red: '#E01A22',
+              yellow: '#FDB813',
+              blue: '#0066B2',
+              green: '#009639',
+              orange: '#F58220',
+              brown: '#4A2311',
+              dark: '#1c1008',
+              card: 'rgba(28, 16, 8, 0.88)'
+            }
+          },
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+            brand: ['"Paytone One"', 'cursive']
+          }
+        }
+      }
+    };
+  </script>
+
+  <style>
+    body {
+      background: radial-gradient(circle at 50% 50%, #2b1407 0%, #150a04 60%, #080301 100%);
+      color: #fff;
+      overflow: hidden;
+      user-select: none;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+    .glass-card {
+      background: rgba(28, 16, 8, 0.85);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(253, 184, 19, 0.25);
+      box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.7), 0 0 25px rgba(253, 184, 19, 0.08);
+    }
+    .side-nav-zone {
+      transition: background-color 0.2s ease, opacity 0.2s ease;
+    }
+    .side-nav-zone:hover {
+      background-color: rgba(253, 184, 19, 0.08);
+    }
+    .candy-dot {
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .candy-dot.active {
+      transform: scale(1.35);
+      box-shadow: 0 0 14px rgba(253, 184, 19, 0.8);
+      border-color: #fff;
+    }
+  </style>
+</head>
+<body class="h-full w-full relative flex flex-col justify-between">
+
+  <canvas id="falling-candies-canvas" class="absolute inset-0 pointer-events-none z-0 opacity-0 transition-opacity duration-700"></canvas>
+
+  <div id="globe-container" class="absolute inset-0 z-0 cursor-grab active:cursor-grabbing transition-opacity duration-700"></div>
+
+  <header class="relative z-20 w-full px-4 sm:px-6 py-3.5 flex items-center justify-between pointer-events-none">
+    <div class="pointer-events-auto flex items-center space-x-3">
+      <div class="w-10 h-10 rounded-full bg-mm-red border-2 border-white shadow-lg flex items-center justify-center transform -rotate-12 hover:rotate-0 transition-transform">
+        <span class="font-brand text-white text-xl leading-none">m</span>
+      </div>
+      <div>
+        <div class="flex items-center space-x-2">
+          <h1 class="font-brand text-2xl tracking-wider text-mm-yellow drop-shadow">M&M's</h1>
+          <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold uppercase bg-amber-500/20 text-amber-300 border border-amber-400/30 tracking-widest">Global Report</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="pointer-events-auto flex items-center space-x-2 sm:space-x-3">
+      <button id="btn-sound" class="p-2.5 rounded-xl glass-card hover:border-mm-yellow/70 transition-colors text-amber-200 hover:text-white" title="Bật/Tắt Âm thanh">
+        <svg id="sound-icon-on" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"></path></svg>
+        <svg id="sound-icon-off" class="w-5 h-5 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z m12 1l4 4m0-4l-4 4"></path></svg>
+      </button>
+
+      <button id="btn-auto-rotate" class="px-3.5 py-2 text-xs font-semibold rounded-xl glass-card border border-amber-500/30 hover:border-mm-yellow transition-all flex items-center space-x-1.5 text-amber-100">
+        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+        <span id="rotate-label">Xoay tự động: Bật</span>
+      </button>
+
+      <button id="btn-presentation-mode" class="px-3.5 py-2 text-xs md:text-sm font-bold rounded-xl bg-gradient-to-r from-mm-red to-mm-orange hover:from-red-600 hover:to-orange-500 text-white shadow-lg transition-transform active:scale-95 flex items-center space-x-1.5">
+        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M4 4a2 2 0 012-2h8a2 2 0 012 2v12a1 1 0 01-1.581.814L10 13.175l-4.419 3.639A1 1 0 014 16V4z"></path></svg>
+        <span>Chế độ Slide Tour</span>
+      </button>
+
+      <!-- Prominent PowerPoint Export Button -->
+      <button id="btn-export-pptx" class="px-3.5 py-2 text-xs md:text-sm font-black rounded-xl bg-gradient-to-r from-amber-400 to-yellow-500 hover:from-amber-300 hover:to-yellow-400 text-stone-950 shadow-lg shadow-amber-500/20 transition-all active:scale-95 flex items-center space-x-1.5 border border-yellow-300">
+        <svg class="w-4 h-4 text-stone-950" fill="currentColor" viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
+        <span>Xuất File PPTX</span>
+      </button>
+    </div>
+  </header>
+
+  <button id="nav-side-prev" class="side-nav-zone absolute left-0 top-16 bottom-0 w-16 sm:w-20 z-20 flex items-center justify-start pl-3 text-white/40 hover:text-white group focus:outline-none transition-all" title="Trang trước (←)">
+    <div class="p-3 rounded-full bg-black/40 group-hover:bg-amber-500/80 group-hover:text-stone-950 transition-all transform group-hover:-translate-x-1 border border-white/10 group-hover:border-amber-300 shadow-xl">
+      <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"></path></svg>
+    </div>
+  </button>
+
+  <button id="nav-side-next" class="side-nav-zone absolute right-0 top-16 bottom-0 w-16 sm:w-20 z-20 flex items-center justify-end pr-3 text-white/40 hover:text-white group focus:outline-none transition-all" title="Trang sau (→)">
+    <div class="p-3 rounded-full bg-black/40 group-hover:bg-amber-500/80 group-hover:text-stone-950 transition-all transform group-hover:translate-x-1 border border-white/10 group-hover:border-amber-300 shadow-xl">
+      <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"></path></svg>
+    </div>
+  </button>
+
+  <div id="slide-card" class="relative z-10 mx-6 sm:mx-12 md:mx-16 mb-6 max-w-lg glass-card rounded-2xl p-5 sm:p-6 transition-all duration-500 shadow-2xl pointer-events-auto">
+    <!-- Top badge -->
+    <div class="flex items-center justify-between mb-3">
+      <div id="slide-rank-badge" class="flex items-center space-x-1.5 px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider bg-amber-500/20 text-amber-300 border border-amber-400/40">
+        <span>🏆 #1 VÔ ĐỊCH TOÀN CẦU</span>
+      </div>
+      <span id="slide-country-code" class="text-xs font-bold text-amber-200/60 uppercase tracking-widest">USA</span>
+    </div>
+
+    <!-- Country Name & Subtitle -->
+    <div class="mb-4">
+      <h2 id="slide-country-name" class="font-brand text-2xl sm:text-3xl text-white tracking-wide leading-tight">Hoa Kỳ (United States)</h2>
+      <p id="slide-subtitle" class="text-xs text-amber-300 font-semibold mt-1">Newark (Mars HQ) & Toàn Quốc</p>
+    </div>
+
+    <!-- Summary description -->
+    <p id="slide-description" class="text-xs sm:text-sm text-stone-300 leading-relaxed mb-4">
+      Hoa Kỳ là thánh địa khai sinh thương hiệu năm 1941 và là thị trường tiêu thụ số 1 không thể lay chuyển, đóng góp hơn 45% tổng sản lượng tiêu thụ M&M's toàn cầu.
+    </p>
+
+    <!-- Stats Matrix -->
+    <div class="grid grid-cols-2 gap-3 mb-4">
+      <div class="bg-black/40 rounded-xl p-3 border border-amber-500/20">
+        <span class="text-[10px] uppercase font-bold text-amber-400/80 tracking-wider block">Doanh thu ước tính/năm</span>
+        <div class="flex items-baseline space-x-1 mt-0.5">
+          <span id="slide-stat-revenue" class="font-brand text-xl sm:text-2xl text-amber-300">$2.55 Tỷ</span>
+          <span class="text-xs text-stone-400">USD</span>
+        </div>
+        <span id="slide-stat-growth" class="text-[10px] text-emerald-400 font-semibold mt-1 block">↗ +5.9% YoY so với năm trước</span>
+      </div>
+
+      <div class="bg-black/40 rounded-xl p-3 border border-amber-500/20">
+        <span class="text-[10px] uppercase font-bold text-amber-400/80 tracking-wider block">Thị phần phân khúc viên ngọt</span>
+        <div class="flex items-baseline space-x-1 mt-0.5">
+          <span id="slide-stat-share" class="font-brand text-xl sm:text-2xl text-mm-red">38.5%</span>
+        </div>
+        <span id="slide-stat-rank" class="text-[10px] text-amber-300/80 font-semibold mt-1 block">#1 Tuyệt đối mọi bang tại Mỹ</span>
+      </div>
+    </div>
+
+    <!-- Key highlights bullet points -->
+    <div class="space-y-1.5 text-xs text-stone-300 border-t border-white/10 pt-3 mb-4">
+      <div class="flex items-start space-x-2">
+        <span class="text-amber-400 font-bold shrink-0">Vị số 1:</span>
+        <span id="slide-flavor" class="text-white font-medium">Peanut & Peanut Butter</span>
+      </div>
+      <div class="flex items-start space-x-2">
+        <span class="text-amber-400 font-bold shrink-0">Kênh bán:</span>
+        <span id="slide-channels" class="text-stone-300">Wal-Mart, Target, Rạp AMC & M&M's World New York/Vegas</span>
+      </div>
+      <div class="flex items-start space-x-2">
+        <span class="text-amber-400 font-bold shrink-0">Chiến lược:</span>
+        <span id="slide-strategy" class="text-stone-300">Chiến dịch Super Bowl hơn 20 năm & M&M's in hình cá nhân theo yêu cầu</span>
+      </div>
+    </div>
+
+    <!-- Navigation Footer in card -->
+    <div class="flex items-center justify-between pt-2 border-t border-white/10">
+      <button id="btn-prev" class="px-4 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-xs font-bold transition-colors flex items-center space-x-1">
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"></path></svg>
+        <span>Trước</span>
+      </button>
+
+      <div id="slide-dots" class="flex items-center space-x-2">
+        <!-- Dots injected dynamically -->
+      </div>
+
+      <button id="btn-next" class="px-4 py-2 rounded-xl bg-mm-yellow hover:bg-yellow-400 text-mm-dark text-xs font-extrabold transition-all shadow-md flex items-center space-x-1">
+        <span>Kế tiếp</span>
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"></path></svg>
+      </button>
+    </div>
+  </div>
+
+  <div id="slide-channels-container" class="absolute inset-0 z-10 flex items-center justify-center p-4 sm:p-6 opacity-0 pointer-events-none transition-opacity duration-700">
+    <div class="w-full max-w-5xl glass-card rounded-3xl p-5 sm:p-7 shadow-2xl border border-amber-500/30 flex flex-col justify-between" style="max-height: calc(100vh - 110px);">
+      <!-- Slide Header -->
+      <div class="flex items-center justify-between border-b border-white/10 pb-3">
+        <div>
+          <div class="flex items-center space-x-2">
+            <span class="w-2.5 h-2.5 rounded-full bg-mm-yellow"></span>
+            <span class="text-xs uppercase font-extrabold tracking-widest text-amber-300">Hệ Thống Phân Phối Toàn Cầu</span>
+          </div>
+          <h2 class="font-brand text-2xl sm:text-3xl text-white tracking-wide mt-0.5">5 Kênh Bán Hàng Trọng Tâm M&M's</h2>
+        </div>
+        <div class="text-right">
+          <span class="text-xs text-amber-200/80 font-bold">Tổng doanh thu hệ thống</span>
+          <p class="font-brand text-2xl text-amber-400 leading-none mt-0.5">~$3.48 Tỷ USD</p>
+        </div>
+      </div>
+
+      <!-- Key KPI Cards -->
+      <div class="grid grid-cols-3 gap-3 my-3">
+        <div class="bg-black/50 rounded-xl p-2.5 border border-amber-500/20 text-center">
+          <span class="text-[10px] text-stone-400 uppercase font-bold tracking-wider block">Điểm bán lẻ toàn cầu (POS)</span>
+          <span class="font-brand text-lg sm:text-xl text-amber-300 mt-0.5 block">+1.8 Triệu</span>
+        </div>
+        <div class="bg-black/50 rounded-xl p-2.5 border border-amber-500/20 text-center">
+          <span class="text-[10px] text-stone-400 uppercase font-bold tracking-wider block">Kênh tăng tốc nhanh nhất</span>
+          <span class="font-brand text-lg sm:text-xl text-emerald-400 mt-0.5 block">E-Commerce (+22.5%)</span>
+        </div>
+        <div class="bg-black/50 rounded-xl p-2.5 border border-amber-500/20 text-center">
+          <span class="text-[10px] text-stone-400 uppercase font-bold tracking-wider block">Doanh thu mua ngẫu hứng</span>
+          <span class="font-brand text-lg sm:text-xl text-mm-red mt-0.5 block">66% Tổng Sản Lượng</span>
+        </div>
+      </div>
+
+      <!-- Channels Progress Bars -->
+      <div class="space-y-2.5 my-1">
+        <!-- Channel 1 -->
+        <div class="bg-black/40 rounded-xl p-2.5 border border-white/5">
+          <div class="flex items-center justify-between text-xs mb-1">
+            <div class="flex items-center space-x-2">
+              <span class="w-3 h-3 rounded-full bg-amber-400 shrink-0"></span>
+              <span class="font-bold text-white">Siêu thị & Đại siêu thị (Supermarkets / Hypermarkets)</span>
+              <span class="text-[10px] text-stone-400 hidden sm:inline">(Walmart, Carrefour, Tesco, Costco)</span>
+            </div>
+            <div class="font-bold text-amber-300">42% <span class="text-stone-400 font-normal">($1.43 Tỷ USD)</span></div>
+          </div>
+          <div class="w-full bg-stone-900 rounded-full h-2 overflow-hidden">
+            <div class="bg-gradient-to-r from-amber-500 to-yellow-300 h-2 rounded-full" style="width: 42%;"></div>
+          </div>
+        </div>
+
+        <!-- Channel 2 -->
+        <div class="bg-black/40 rounded-xl p-2.5 border border-white/5">
+          <div class="flex items-center justify-between text-xs mb-1">
+            <div class="flex items-center space-x-2">
+              <span class="w-3 h-3 rounded-full bg-mm-red shrink-0"></span>
+              <span class="font-bold text-white">Cửa hàng tiện lợi & Trạm xăng (C-Stores & Gas Stations)</span>
+              <span class="text-[10px] text-stone-400 hidden sm:inline">(7-Eleven, Circle K, Shell, BP)</span>
+            </div>
+            <div class="font-bold text-amber-300">24% <span class="text-stone-400 font-normal">($815 Triệu USD)</span></div>
+          </div>
+          <div class="w-full bg-stone-900 rounded-full h-2 overflow-hidden">
+            <div class="bg-gradient-to-r from-red-600 to-rose-400 h-2 rounded-full" style="width: 24%;"></div>
+          </div>
+        </div>
+
+        <!-- Channel 3 -->
+        <div class="bg-black/40 rounded-xl p-2.5 border border-white/5">
+          <div class="flex items-center justify-between text-xs mb-1">
+            <div class="flex items-center space-x-2">
+              <span class="w-3 h-3 rounded-full bg-emerald-400 shrink-0"></span>
+              <span class="font-bold text-white">Thương mại điện tử & D2C (E-Commerce)</span>
+              <span class="text-[10px] text-stone-400 hidden sm:inline">(Amazon, Tmall, M&Ms.com D2C)</span>
+            </div>
+            <div class="font-bold text-emerald-400">16% <span class="text-stone-400 font-normal">($545 Triệu USD | +22.5% YoY)</span></div>
+          </div>
+          <div class="w-full bg-stone-900 rounded-full h-2 overflow-hidden">
+            <div class="bg-gradient-to-r from-emerald-500 to-teal-300 h-2 rounded-full" style="width: 16%;"></div>
+          </div>
+        </div>
+
+        <!-- Channel 4 -->
+        <div class="bg-black/40 rounded-xl p-2.5 border border-white/5">
+          <div class="flex items-center justify-between text-xs mb-1">
+            <div class="flex items-center space-x-2">
+              <span class="w-3 h-3 rounded-full bg-mm-blue shrink-0"></span>
+              <span class="font-bold text-white">M&M's World Stores & Miễn thuế Sân bay (Travel Retail)</span>
+              <span class="text-[10px] text-stone-400 hidden sm:inline">(New York, London, Shanghai, World Duty Free)</span>
+            </div>
+            <div class="font-bold text-amber-300">10% <span class="text-stone-400 font-normal">($340 Triệu USD)</span></div>
+          </div>
+          <div class="w-full bg-stone-900 rounded-full h-2 overflow-hidden">
+            <div class="bg-gradient-to-r from-blue-600 to-cyan-400 h-2 rounded-full" style="width: 10%;"></div>
+          </div>
+        </div>
+
+        <!-- Channel 5 -->
+        <div class="bg-black/40 rounded-xl p-2.5 border border-white/5">
+          <div class="flex items-center justify-between text-xs mb-1">
+            <div class="flex items-center space-x-2">
+              <span class="w-3 h-3 rounded-full bg-mm-orange shrink-0"></span>
+              <span class="font-bold text-white">Rạp chiếu phim & Máy bán lẻ tự động (Cinemas & Vending)</span>
+              <span class="text-[10px] text-stone-400 hidden sm:inline">(AMC, Regal, Sân bay & Trường đại học)</span>
+            </div>
+            <div class="font-bold text-amber-300">8% <span class="text-stone-400 font-normal">($275 Triệu USD)</span></div>
+          </div>
+          <div class="w-full bg-stone-900 rounded-full h-2 overflow-hidden">
+            <div class="bg-gradient-to-r from-orange-500 to-amber-300 h-2 rounded-full" style="width: 8%;"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Slide 4 Navigation Footer -->
+      <div class="flex items-center justify-between pt-3 border-t border-white/10 mt-2">
+        <button id="btn-channels-prev" class="px-4 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-xs font-bold transition-colors flex items-center space-x-1">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"></path></svg>
+          <span>Trước</span>
+        </button>
+
+        <div id="channels-slide-dots" class="flex items-center space-x-2">
+          <!-- Dots rendered dynamically -->
+        </div>
+
+        <button id="btn-channels-next" class="px-4 py-2 rounded-xl bg-mm-yellow hover:bg-yellow-400 text-mm-dark text-xs font-extrabold transition-all shadow-md flex items-center space-x-1">
+          <span>Kế tiếp</span>
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"></path></svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const TOP_MARKETS = [
+      {
+        id: 'usa',
+        rank: '🏆 #1 VÔ ĐỊCH TOÀN CẦU',
+        code: 'USA',
+        name: 'Hoa Kỳ (United States)',
+        subtitle: 'Newark (Mars HQ) & Toàn Quốc',
+        lat: 40.7357,
+        lon: -74.1724,
+        revenue: '$2.55 Tỷ',
+        growth: '↗ +5.9% YoY so với năm trước',
+        share: '38.5%',
+        rankDesc: '#1 Tuyệt đối mọi bang tại Mỹ',
+        flavor: 'Peanut & Peanut Butter',
+        channels: 'Wal-Mart, Target, Rạp AMC & M&M\'s World New York/Vegas',
+        strategy: 'Chiến dịch Super Bowl hơn 20 năm & M&M\'s in hình cá nhân theo yêu cầu',
+        description: 'Hoa Kỳ là thánh địa khai sinh thương hiệu năm 1941 và là thị trường tiêu thụ số 1 không thể lay chuyển, đóng góp hơn 45% tổng sản lượng tiêu thụ M&M\'s toàn cầu.',
+        podiumColor: 0xFDB813
+      },
+      {
+        id: 'gbr',
+        rank: '🥈 #2 THỊ TRƯỜNG CHÂU ÂU',
+        code: 'GBR',
+        name: 'Vương Quốc Anh (United Kingdom)',
+        subtitle: 'Slough Factory & London Flagship',
+        lat: 51.5074,
+        lon: -0.1278,
+        revenue: '$445 Triệu',
+        growth: '↗ +4.6% YoY nhu cầu ổn định',
+        share: '24.8%',
+        rankDesc: '#1 Thị trường bánh kẹo dạng viên tại Anh',
+        flavor: 'Crispy & Peanut (Crispy cực kỳ được yêu thích)',
+        channels: 'Tesco, Sainsbury\'s, Boots & M&M\'s World Leicester Square (London)',
+        strategy: 'Tập trung dòng kẹo Crispy giòn rụm và các gói chia sẻ túi lớn gia đình (Pouch Bags)',
+        description: 'Vương quốc Anh là thị trường châu Âu có mức tiêu thụ bình quân đầu người cao nhất. Cửa hàng M&M\'s World tại Quảng trường Leicester là một trong những điểm thu hút khách du lịch lớn nhất London.',
+        podiumColor: 0xE0E0E0
+      },
+      {
+        id: 'chn',
+        rank: '🥉 #3 TĂNG TRƯỞNG CHÂU Á',
+        code: 'CHN',
+        name: 'Trung Quốc (China)',
+        subtitle: 'Nhà máy Gia Hưng & Thượng Hải Flagship',
+        lat: 31.2304,
+        lon: 121.4737,
+        revenue: '$410 Triệu',
+        growth: '🚀 +12.1% YoY tăng tốc nhanh nhất',
+        share: '19.2%',
+        rankDesc: 'Thương hiệu sô-cô-la quốc tế Top 3 tại đại lục',
+        flavor: 'Milk Chocolate & Dòng kẹo trà sữa giới hạn',
+        channels: 'Tmall, JD.com, siêu thị Yonghui & M&M\'s World Thượng Hải (Phố đi bộ Nam Kinh)',
+        strategy: 'Hộp quà Tết Nguyên Đán phiên bản đặc biệt và liên kết với các trò chơi di động đình đám',
+        description: 'Trung Quốc là động cơ tăng trưởng nhanh nhất của M&M\'s toàn cầu. Chiến lược số hóa, bán hàng qua Livestream thương mại điện tử kết hợp bao bì Tết đã mang lại doanh số đột phá.',
+        podiumColor: 0xCD7F32
+      }
+    ];
+
+    const TOTAL_SLIDES = 4;
+    let currentSlideIndex = 0;
+    let isAutoRotating = true;
+    let isPresentationTour = false;
+    let presentationTimer = null;
+    let soundEnabled = true;
+
+    let synth = null;
+    function initSound() {
+      try {
+        if (!synth && window.Tone) {
+          synth = new Tone.PolySynth(Tone.Synth, {
+            oscillator: { type: 'sine' },
+            envelope: { attack: 0.005, decay: 0.1, sustain: 0.05, release: 0.4 }
+          }).toDestination();
+          synth.volume.value = -12;
+        }
+        if (window.Tone && Tone.context.state !== 'running') {
+          Tone.start();
+        }
+      } catch (e) {
+        console.warn('Tone.js audio init issue:', e);
+      }
+    }
+
+    function playSound(type) {
+      if (!soundEnabled) return;
+      initSound();
+      if (!synth) return;
+      try {
+        const now = Tone.now();
+        if (type === 'slide') {
+          synth.triggerAttackRelease(['C5', 'G5'], '16n', now);
+        } else if (type === 'click') {
+          synth.triggerAttackRelease(['E5'], '32n', now);
+        } else if (type === 'success') {
+          synth.triggerAttackRelease(['C5', 'E5', 'G5', 'C6'], '16n', now);
+        }
+      } catch (e) {
+        // Fallback silently
+      }
+    }
+
+    let scene, camera, renderer, globeGroup;
+    let earthMesh, atmosphereMesh;
+    let candyRingGroup;
+    let pinObjects = [];
+    let arcLines = [];
+    let isDragging = false;
+    let prevMouseX = 0;
+    let prevMouseY = 0;
+    let targetCameraPos = new THREE.Vector3(0, 20, 180);
+    let targetLookAt = new THREE.Vector3(0, 0, 0);
+
+    function initThreeScene() {
+      const container = document.getElementById('globe-container');
+      const width = window.innerWidth;
+      const height = window.innerHeight;
+
+      scene = new THREE.Scene();
+      camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 1000);
+      camera.position.set(0, 30, 200);
+
+      renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+      renderer.setSize(width, height);
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      container.appendChild(renderer.domElement);
+
+      // Ambient and directional lighting
+      const ambientLight = new THREE.AmbientLight(0xfff5ea, 1.2);
+      scene.add(ambientLight);
+
+      const sunLight = new THREE.DirectionalLight(0xfffaed, 1.8);
+      sunLight.position.set(150, 100, 120);
+      scene.add(sunLight);
+
+      const rimLight = new THREE.DirectionalLight(0xFDB813, 0.9);
+      rimLight.position.set(-120, -50, -100);
+      scene.add(rimLight);
+
+      globeGroup = new THREE.Group();
+      scene.add(globeGroup);
+
+      buildRealisticProceduralEarth();
+      buildAtmosphereGlow();
+      buildOrbitalCandyRing();
+      buildMarketPinsAndTradeArcs();
+
+      window.addEventListener('resize', onWindowResize);
+    }
+
+    function buildRealisticProceduralEarth() {
+      const canvas = document.createElement('canvas');
+      canvas.width = 2048;
+      canvas.height = 1024;
+      const ctx = canvas.getContext('2d');
+
+      // Base chocolate brown gradient
+      const grad = ctx.createLinearGradient(0, 0, 0, canvas.height);
+      grad.addColorStop(0, '#2d1408');
+      grad.addColorStop(0.5, '#421d0a');
+      grad.addColorStop(1, '#240f06');
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // Continents with golden glow border
+      ctx.fillStyle = '#653112';
+      ctx.strokeStyle = '#FDB813';
+      ctx.lineWidth = 3;
+
+      function drawLand(x, y, w, h, angle = 0) {
+        ctx.save();
+        ctx.translate(x, y);
+        ctx.rotate(angle);
+        ctx.beginPath();
+        ctx.ellipse(0, 0, w, h, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+        ctx.restore();
+      }
+
+      // North America
+      drawLand(450, 320, 180, 130, -0.2);
+      drawLand(380, 240, 120, 80, 0.3);
+      // South America
+      drawLand(620, 680, 110, 190, 0.3);
+      // Europe
+      drawLand(1080, 300, 100, 80, 0.1);
+      // Africa
+      drawLand(1100, 560, 140, 170, 0.1);
+      // Asia
+      drawLand(1450, 340, 240, 150, 0.05);
+      drawLand(1380, 480, 90, 90, 0);
+      // Australia
+      drawLand(1680, 720, 110, 85, -0.1);
+
+      // Lat/Lon golden grid lines
+      ctx.strokeStyle = 'rgba(253, 184, 19, 0.15)';
+      ctx.lineWidth = 1;
+      for (let lat = 100; lat < canvas.height; lat += 100) {
+        ctx.beginPath();
+        ctx.moveTo(0, lat);
+        ctx.lineTo(canvas.width, lat);
+        ctx.stroke();
+      }
+      for (let lon = 150; lon < canvas.width; lon += 150) {
+        ctx.beginPath();
+        ctx.moveTo(lon, 0);
+        ctx.lineTo(lon, canvas.height);
+        ctx.stroke();
+      }
+
+      // Sparkling city night points
+      ctx.fillStyle = '#FFE082';
+      for (let i = 0; i < 600; i++) {
+        const px = Math.random() * canvas.width;
+        const py = Math.random() * canvas.height;
+        ctx.beginPath();
+        ctx.arc(px, py, Math.random() * 2 + 0.5, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      const earthTexture = new THREE.CanvasTexture(canvas);
+      const earthGeo = new THREE.SphereGeometry(65, 64, 64);
+      const earthMat = new THREE.MeshStandardMaterial({
+        map: earthTexture,
+        roughness: 0.45,
+        metalness: 0.15
+      });
+
+      earthMesh = new THREE.Mesh(earthGeo, earthMat);
+      globeGroup.add(earthMesh);
+    }
+
+    function buildAtmosphereGlow() {
+      const atmoGeo = new THREE.SphereGeometry(67.5, 32, 32);
+      const atmoMat = new THREE.MeshBasicMaterial({
+        color: 0xFDB813,
+        transparent: true,
+        opacity: 0.12,
+        side: THREE.BackSide
+      });
+      atmosphereMesh = new THREE.Mesh(atmoGeo, atmoMat);
+      globeGroup.add(atmosphereMesh);
+    }
+
+    function buildOrbitalCandyRing() {
+      candyRingGroup = new THREE.Group();
+      candyRingGroup.rotation.x = Math.PI * 0.28;
+      candyRingGroup.rotation.y = Math.PI * 0.1;
+
+      const candyColors = [0xE01A22, 0xFDB813, 0x0066B2, 0x009639, 0xF58220, 0x4A2311];
+      const ringRadius = 95;
+      const totalCandies = 36;
+
+      for (let i = 0; i < totalCandies; i++) {
+        const angle = (i / totalCandies) * Math.PI * 2;
+        const x = Math.cos(angle) * ringRadius;
+        const z = Math.sin(angle) * ringRadius;
+
+        const color = candyColors[i % candyColors.length];
+        const candyGeo = new THREE.CylinderGeometry(2.4, 2.4, 1.2, 18);
+        const candyMat = new THREE.MeshStandardMaterial({
+          color: color,
+          roughness: 0.3,
+          metalness: 0.2
+        });
+        const candy = new THREE.Mesh(candyGeo, candyMat);
+        candy.position.set(x, 0, z);
+        candy.rotation.x = Math.PI * 0.5;
+        candy.rotation.z = angle;
+        candyRingGroup.add(candy);
+      }
+
+      globeGroup.add(candyRingGroup);
+    }
+
+    function buildMarketPinsAndTradeArcs() {
+      const R = 65;
+
+      TOP_MARKETS.forEach((market, idx) => {
+        const phi = (90 - market.lat) * (Math.PI / 180);
+        const theta = (market.lon + 180) * (Math.PI / 180);
+
+        const x = -(R * Math.sin(phi) * Math.cos(theta));
+        const z = R * Math.sin(phi) * Math.sin(theta);
+        const y = R * Math.cos(phi);
+
+        const normal = new THREE.Vector3(x, y, z).normalize();
+        const pinGroup = new THREE.Group();
+        pinGroup.position.set(x, y, z);
+        pinGroup.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), normal);
+
+        // Light beam
+        const beamGeo = new THREE.CylinderGeometry(0.5, 1.2, 16, 16);
+        beamGeo.translate(0, 8, 0);
+        const beamMat = new THREE.MeshBasicMaterial({
+          color: market.podiumColor,
+          transparent: true,
+          opacity: 0.75
+        });
+        const beam = new THREE.Mesh(beamGeo, beamMat);
+        pinGroup.add(beam);
+
+        // Candy head
+        const headGeo = new THREE.CylinderGeometry(3.5, 3.5, 1.6, 20);
+        headGeo.translate(0, 16, 0);
+        const headMat = new THREE.MeshStandardMaterial({
+          color: market.podiumColor,
+          roughness: 0.25,
+          metalness: 0.4
+        });
+        const head = new THREE.Mesh(headGeo, headMat);
+        pinGroup.add(head);
+
+        // Ground pulse ring
+        const ringGeo = new THREE.RingGeometry(2, 4.5, 24);
+        ringGeo.rotateX(-Math.PI / 2);
+        const ringMat = new THREE.MeshBasicMaterial({
+          color: market.podiumColor,
+          transparent: true,
+          opacity: 0.8,
+          side: THREE.DoubleSide
+        });
+        const ring = new THREE.Mesh(ringGeo, ringMat);
+        pinGroup.add(ring);
+
+        pinGroup.userData = { marketIndex: idx, ringMesh: ring, headMesh: head };
+        globeGroup.add(pinGroup);
+        pinObjects.push(pinGroup);
+      });
+
+      // Trade arcs between USA and UK/China
+      const usaPos = getSphereVector(TOP_MARKETS[0].lat, TOP_MARKETS[0].lon, R);
+      const ukPos = getSphereVector(TOP_MARKETS[1].lat, TOP_MARKETS[1].lon, R);
+      const chnPos = getSphereVector(TOP_MARKETS[2].lat, TOP_MARKETS[2].lon, R);
+
+      create3DArc(usaPos, ukPos, 0xFDB813);
+      create3DArc(usaPos, chnPos, 0xF58220);
+    }
+
+    function getSphereVector(lat, lon, radius) {
+      const phi = (90 - lat) * (Math.PI / 180);
+      const theta = (lon + 180) * (Math.PI / 180);
+      const x = -(radius * Math.sin(phi) * Math.cos(theta));
+      const z = radius * Math.sin(phi) * Math.sin(theta);
+      const y = radius * Math.cos(phi);
+      return new THREE.Vector3(x, y, z);
+    }
+
+    function create3DArc(v1, v2, colorHex) {
+      const mid = new THREE.Vector3().addVectors(v1, v2).multiplyScalar(0.5);
+      const dist = v1.distanceTo(v2);
+      mid.normalize().multiplyScalar(65 + dist * 0.28);
+
+      const curve = new THREE.QuadraticBezierCurve3(v1, mid, v2);
+      const points = curve.getPoints(50);
+      const geometry = new THREE.BufferGeometry().setFromPoints(points);
+      const material = new THREE.LineBasicMaterial({
+        color: colorHex,
+        transparent: true,
+        opacity: 0.75,
+        linewidth: 2
+      });
+      const arc = new THREE.Line(geometry, material);
+      globeGroup.add(arc);
+      arcLines.push(arc);
+    }
+
+    let fallingAnimId = null;
+    let candies = [];
+
+    function initFallingCandiesCanvas() {
+      const canvas = document.getElementById('falling-candies-canvas');
+      const ctx = canvas.getContext('2d');
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+
+      const colors = ['#E01A22', '#FDB813', '#0066B2', '#009639', '#F58220', '#4A2311'];
+      candies = [];
+      for (let i = 0; i < 45; i++) {
+        candies.push({
+          x: Math.random() * canvas.width,
+          y: Math.random() * canvas.height,
+          radius: Math.random() * 14 + 12,
+          color: colors[Math.floor(Math.random() * colors.length)],
+          speedY: Math.random() * 1.5 + 0.8,
+          speedX: Math.sin(Math.random() * Math.PI) * 0.6,
+          rotation: Math.random() * Math.PI * 2,
+          rotationSpeed: (Math.random() - 0.5) * 0.04
+        });
+      }
+    }
+
+    function renderFallingCandies() {
+      const canvas = document.getElementById('falling-candies-canvas');
+      const ctx = canvas.getContext('2d');
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      candies.forEach(c => {
+        c.y += c.speedY;
+        c.x += c.speedX;
+        c.rotation += c.rotationSpeed;
+
+        if (c.y > canvas.height + 40) {
+          c.y = -30;
+          c.x = Math.random() * canvas.width;
+        }
+
+        ctx.save();
+        ctx.translate(c.x, c.y);
+        ctx.rotate(c.rotation);
+
+        // Candy body
+        ctx.beginPath();
+        ctx.ellipse(0, 0, c.radius, c.radius * 0.85, 0, 0, Math.PI * 2);
+        ctx.fillStyle = c.color;
+        ctx.shadowColor = 'rgba(0,0,0,0.4)';
+        ctx.shadowBlur = 8;
+        ctx.fill();
+
+        // White 'm' logo
+        ctx.fillStyle = 'rgba(255,255,255,0.9)';
+        ctx.font = `bold ${Math.floor(c.radius * 0.8)}px "Paytone One", cursive`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('m', 0, 1);
+
+        ctx.restore();
+      });
+
+      fallingAnimId = requestAnimationFrame(renderFallingCandies);
+    }
+
+    function startFallingCandies() {
+      if (!fallingAnimId) {
+        initFallingCandiesCanvas();
+        renderFallingCandies();
+      }
+    }
+
+    function stopFallingCandies() {
+      if (fallingAnimId) {
+        cancelAnimationFrame(fallingAnimId);
+        fallingAnimId = null;
+      }
+    }
+
+    function goToSlide(index, triggerAudio = true) {
+      if (index < 0) index = TOTAL_SLIDES - 1;
+      if (index >= TOTAL_SLIDES) index = 0;
+      currentSlideIndex = index;
+
+      const globeContainer = document.getElementById('globe-container');
+      const slideCard = document.getElementById('slide-card');
+      const channelsContainer = document.getElementById('slide-channels-container');
+      const fallingCanvas = document.getElementById('falling-candies-canvas');
+
+      if (index === 3) {
+        // Slide 4: Distribution Channels
+        globeContainer.classList.add('opacity-15');
+        slideCard.classList.add('opacity-0', 'pointer-events-none');
+        channelsContainer.classList.remove('opacity-0', 'pointer-events-none');
+        channelsContainer.classList.add('opacity-100', 'pointer-events-auto');
+        fallingCanvas.classList.remove('opacity-0');
+        fallingCanvas.classList.add('opacity-100');
+        startFallingCandies();
+      } else {
+        // Slides 0, 1, 2: 3D Globe Markets
+        channelsContainer.classList.add('opacity-0', 'pointer-events-none');
+        channelsContainer.classList.remove('opacity-100', 'pointer-events-auto');
+        fallingCanvas.classList.add('opacity-0');
+        fallingCanvas.classList.remove('opacity-100');
+        stopFallingCandies();
+
+        globeContainer.classList.remove('opacity-15');
+        slideCard.classList.remove('opacity-0', 'pointer-events-none');
+
+        const m = TOP_MARKETS[index];
+        // Rotate globe towards selected market coordinates
+        const phi = (90 - m.lat) * (Math.PI / 180);
+        const theta = (m.lon + 180) * (Math.PI / 180);
+
+        const dist = 180;
+        const camX = -(dist * Math.sin(phi) * Math.cos(theta));
+        const camZ = dist * Math.sin(phi) * Math.sin(theta);
+        const camY = dist * Math.cos(phi) + 10;
+
+        targetCameraPos.set(camX, camY, camZ);
+        targetLookAt.set(0, 0, 0);
+
+        // Highlight pin in 3D
+        pinObjects.forEach((p, pIdx) => {
+          const isSelected = pIdx === index;
+          p.userData.headMesh.scale.set(isSelected ? 1.4 : 1, isSelected ? 1.4 : 1, isSelected ? 1.4 : 1);
+          p.userData.ringMesh.material.opacity = isSelected ? 1.0 : 0.4;
+        });
+
+        updateSlideCardContent(m);
+      }
+
+      renderSlideDots();
+      if (triggerAudio) playSound('slide');
+    }
+
+    function updateSlideCardContent(m) {
+      document.getElementById('slide-rank-badge').innerHTML = `<span>${m.rank}</span>`;
+      document.getElementById('slide-country-code').textContent = m.code;
+      document.getElementById('slide-country-name').textContent = m.name;
+      document.getElementById('slide-subtitle').textContent = m.subtitle;
+      document.getElementById('slide-description').textContent = m.description;
+      document.getElementById('slide-stat-revenue').textContent = m.revenue;
+      document.getElementById('slide-stat-growth').textContent = m.growth;
+      document.getElementById('slide-stat-share').textContent = m.share;
+      document.getElementById('slide-stat-rank').textContent = m.rankDesc;
+      document.getElementById('slide-flavor').textContent = m.flavor;
+      document.getElementById('slide-channels').textContent = m.channels;
+      document.getElementById('slide-strategy').textContent = m.strategy;
+    }
+
+    function renderSlideDots() {
+      const dotsCont1 = document.getElementById('slide-dots');
+      const dotsCont2 = document.getElementById('channels-slide-dots');
+
+      [dotsCont1, dotsCont2].forEach(container => {
+        if (!container) return;
+        container.innerHTML = '';
+        const dotColors = ['#FDB813', '#E01A22', '#0066B2', '#009639'];
+        for (let i = 0; i < TOTAL_SLIDES; i++) {
+          const btn = document.createElement('button');
+          btn.className = `w-3 h-3 rounded-full candy-dot border border-white/40 ${i === currentSlideIndex ? 'active scale-125' : 'opacity-50 hover:opacity-100'}`;
+          btn.style.backgroundColor = dotColors[i];
+          btn.title = `Slide ${i + 1}`;
+          btn.onclick = (e) => {
+            e.stopPropagation();
+            goToSlide(i);
+          };
+          container.appendChild(btn);
+        }
+      });
+    }
+
+    function exportToPowerPoint() {
+      try {
+        if (typeof PptxGenJS === 'undefined') {
+          console.error('PptxGenJS library is loading, please try again in a second.');
+          return;
+        }
+
+        const pptx = new PptxGenJS();
+        pptx.layout = 'LAYOUT_16x9';
+
+        // Slide 1: USA
+        const s1 = pptx.addSlide();
+        s1.background = { color: '240F06' };
+        s1.addText("M&M's GLOBAL SALES REPORT", { x: 0.8, y: 0.6, fontSize: 13, bold: true, color: 'FDB813', fontFace: 'Arial' });
+        s1.addText("Hoa Kỳ (United States)", { x: 0.8, y: 1.1, fontSize: 28, bold: true, color: 'FFFFFF', fontFace: 'Arial' });
+        s1.addText("🏆 #1 VÔ ĐỊCH TOÀN CẦU • Newark (Mars HQ)", { x: 0.8, y: 1.7, fontSize: 13, bold: true, color: 'FDB813' });
+        s1.addText("Hoa Kỳ là thánh địa khai sinh thương hiệu năm 1941 và là thị trường tiêu thụ số 1 không thể lay chuyển, đóng góp hơn 45% tổng sản lượng tiêu thụ M&M's toàn cầu.", { x: 0.8, y: 2.2, w: 8.5, fontSize: 13, color: 'D5D5D5' });
+        s1.addShape(pptx.ShapeType.rect, { x: 0.8, y: 3.3, w: 4.0, h: 2.0, fill: { color: '180B04' }, line: { color: 'FDB813', width: 1 } });
+        s1.addText("DOANH THU ƯỚC TÍNH\n$2.55 Tỷ USD\n↗ +5.9% YoY", { x: 1.0, y: 3.6, fontSize: 15, bold: true, color: 'FDB813' });
+        s1.addShape(pptx.ShapeType.rect, { x: 5.2, y: 3.3, w: 4.0, h: 2.0, fill: { color: '180B04' }, line: { color: 'E01A22', width: 1 } });
+        s1.addText("THỊ PHẦN PHÂN KHÚC\n38.5%\n#1 Tuyệt đối mọi bang tại Mỹ", { x: 5.4, y: 3.6, fontSize: 15, bold: true, color: 'E01A22' });
+
+        // Slide 2: UK
+        const s2 = pptx.addSlide();
+        s2.background = { color: '240F06' };
+        s2.addText("M&M's GLOBAL SALES REPORT", { x: 0.8, y: 0.6, fontSize: 13, bold: true, color: 'FDB813', fontFace: 'Arial' });
+        s2.addText("Vương Quốc Anh (United Kingdom)", { x: 0.8, y: 1.1, fontSize: 28, bold: true, color: 'FFFFFF', fontFace: 'Arial' });
+        s2.addText("🥈 #2 THỊ TRƯỜNG CHÂU ÂU • Slough Factory & London Flagship", { x: 0.8, y: 1.7, fontSize: 13, bold: true, color: 'E0E0E0' });
+        s2.addText("Vương quốc Anh là thị trường châu Âu có mức tiêu thụ bình quân đầu người cao nhất. Cửa hàng M&M's World tại Quảng trường Leicester là biểu tượng bán lẻ lớn nhất London.", { x: 0.8, y: 2.2, w: 8.5, fontSize: 13, color: 'D5D5D5' });
+        s2.addShape(pptx.ShapeType.rect, { x: 0.8, y: 3.3, w: 4.0, h: 2.0, fill: { color: '180B04' }, line: { color: 'E0E0E0', width: 1 } });
+        s2.addText("DOANH THU ƯỚC TÍNH\n$445 Triệu USD\n↗ +4.6% YoY", { x: 1.0, y: 3.6, fontSize: 15, bold: true, color: 'E0E0E0' });
+        s2.addShape(pptx.ShapeType.rect, { x: 5.2, y: 3.3, w: 4.0, h: 2.0, fill: { color: '180B04' }, line: { color: '0066B2', width: 1 } });
+        s2.addText("THỊ PHẦN PHÂN KHÚC\n24.8%\n#1 Dòng kẹo Crispy & Pouch Bags", { x: 5.4, y: 3.6, fontSize: 15, bold: true, color: '0066B2' });
+
+        // Slide 3: China
+        const s3 = pptx.addSlide();
+        s3.background = { color: '240F06' };
+        s3.addText("M&M's GLOBAL SALES REPORT", { x: 0.8, y: 0.6, fontSize: 13, bold: true, color: 'FDB813', fontFace: 'Arial' });
+        s3.addText("Trung Quốc (China)", { x: 0.8, y: 1.1, fontSize: 28, bold: true, color: 'FFFFFF', fontFace: 'Arial' });
+        s3.addText("🥉 #3 TĂNG TRƯỞNG CHÂU Á • Nhà máy Gia Hưng & Thượng Hải Flagship", { x: 0.8, y: 1.7, fontSize: 13, bold: true, color: 'CD7F32' });
+        s3.addText("Trung Quốc là động cơ tăng trưởng nhanh nhất của M&M's toàn cầu với mức tăng trưởng phi mã +12.1% YoY nhờ thương mại điện tử và quà tặng Tết.", { x: 0.8, y: 2.2, w: 8.5, fontSize: 13, color: 'D5D5D5' });
+        s3.addShape(pptx.ShapeType.rect, { x: 0.8, y: 3.3, w: 4.0, h: 2.0, fill: { color: '180B04' }, line: { color: 'CD7F32', width: 1 } });
+        s3.addText("DOANH THU ƯỚC TÍNH\n$410 Triệu USD\n🚀 +12.1% YoY", { x: 1.0, y: 3.6, fontSize: 15, bold: true, color: 'CD7F32' });
+        s3.addShape(pptx.ShapeType.rect, { x: 5.2, y: 3.3, w: 4.0, h: 2.0, fill: { color: '180B04' }, line: { color: 'F58220', width: 1 } });
+        s3.addText("THỊ PHẦN PHÂN KHÚC\n19.2%\nTop 3 Thương hiệu quốc tế", { x: 5.4, y: 3.6, fontSize: 15, bold: true, color: 'F58220' });
+
+        // Slide 4: Channels Matrix
+        const s4 = pptx.addSlide();
+        s4.background = { color: '240F06' };
+        s4.addText("HỆ THỐNG KÊNH PHÂN PHỐI TOÀN CẦU M&M's", { x: 0.8, y: 0.6, fontSize: 24, bold: true, color: 'FDB813' });
+        s4.addText("Tổng doanh thu toàn hệ thống: ~$3.48 Tỷ USD • +1.8 Triệu điểm bán lẻ (POS)", { x: 0.8, y: 1.3, fontSize: 13, color: 'E0E0E0' });
+        
+        const channelData = [
+          "1. Siêu thị & Đại siêu thị (Supermarkets / Hypermarkets): 42% ($1.43 Tỷ USD) - Walmart, Carrefour, Costco",
+          "2. Cửa hàng tiện lợi & Trạm xăng (C-Stores): 24% ($815 Triệu USD) - 7-Eleven, Circle K",
+          "3. Thương mại điện tử & D2C: 16% ($545 Triệu USD | +22.5% YoY) - Amazon, Tmall, M&Ms.com",
+          "4. M&M's World & Travel Retail: 10% ($340 Triệu USD) - London, NY, Shanghai Flagship Stores",
+          "5. Rạp chiếu phim & Vending: 8% ($275 Triệu USD) - AMC Theatres, Sân bay & Trường học"
+        ];
+        channelData.forEach((ch, idx) => {
+          s4.addShape(pptx.ShapeType.rect, { x: 0.8, y: 1.9 + (idx * 0.95), w: 11.5, h: 0.8, fill: { color: '1A0C05' }, line: { color: 'FDB813', width: 0.5 } });
+          s4.addText(ch, { x: 1.0, y: 2.1 + (idx * 0.95), fontSize: 12, bold: true, color: 'FFFFFF' });
+        });
+
+        pptx.writeFile({ fileName: "Bao_Cao_Doanh_Thu_MMs_Toan_Cau.pptx" });
+        playSound('success');
+      } catch (err) {
+        console.error('Lỗi khi xuất file PPTX:', err);
+      }
+    }
+
+    function setupEventListeners() {
+      // Prev/Next buttons
+      document.getElementById('btn-prev').addEventListener('click', () => goToSlide(currentSlideIndex - 1));
+      document.getElementById('btn-next').addEventListener('click', () => goToSlide(currentSlideIndex + 1));
+      document.getElementById('btn-channels-prev').addEventListener('click', () => goToSlide(currentSlideIndex - 1));
+      document.getElementById('btn-channels-next').addEventListener('click', () => goToSlide(currentSlideIndex + 1));
+
+      // Side screen zones
+      document.getElementById('nav-side-prev').addEventListener('click', () => goToSlide(currentSlideIndex - 1));
+      document.getElementById('nav-side-next').addEventListener('click', () => goToSlide(currentSlideIndex + 1));
+
+      // Keyboard navigation (Arrow Left/Right, Space, PageUp/Down)
+      window.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') {
+          goToSlide(currentSlideIndex + 1);
+        } else if (e.key === 'ArrowLeft' || e.key === 'PageUp') {
+          goToSlide(currentSlideIndex - 1);
+        }
+      });
+
+      // Swipe navigation for mobile/touch
+      let touchStartX = 0;
+      window.addEventListener('touchstart', (e) => {
+        touchStartX = e.touches[0].clientX;
+      }, { passive: true });
+      window.addEventListener('touchend', (e) => {
+        const touchEndX = e.changedTouches[0].clientX;
+        const diffX = touchEndX - touchStartX;
+        if (Math.abs(diffX) > 60) {
+          if (diffX < 0) goToSlide(currentSlideIndex + 1);
+          else goToSlide(currentSlideIndex - 1);
+        }
+      }, { passive: true });
+
+      // Auto-rotation button
+      const rotateBtn = document.getElementById('btn-auto-rotate');
+      const rotateLabel = document.getElementById('rotate-label');
+      rotateBtn.addEventListener('click', () => {
+        isAutoRotating = !isAutoRotating;
+        rotateLabel.textContent = `Xoay tự động: ${isAutoRotating ? 'Bật' : 'Tắt'}`;
+        playSound('click');
+      });
+
+      // Slide Tour Presentation Mode
+      const tourBtn = document.getElementById('btn-presentation-mode');
+      tourBtn.addEventListener('click', () => {
+        isPresentationTour = !isPresentationTour;
+        if (isPresentationTour) {
+          tourBtn.classList.add('ring-2', 'ring-amber-300');
+          tourBtn.querySelector('span').textContent = 'Dừng Tour';
+          presentationTimer = setInterval(() => {
+            goToSlide(currentSlideIndex + 1);
+          }, 6500);
+        } else {
+          tourBtn.classList.remove('ring-2', 'ring-amber-300');
+          tourBtn.querySelector('span').textContent = 'Chế độ Slide Tour';
+          clearInterval(presentationTimer);
+        }
+        playSound('click');
+      });
+
+      // Sound mute toggle
+      const soundBtn = document.getElementById('btn-sound');
+      const iconOn = document.getElementById('sound-icon-on');
+      const iconOff = document.getElementById('sound-icon-off');
+      soundBtn.addEventListener('click', () => {
+        soundEnabled = !soundEnabled;
+        iconOn.classList.toggle('hidden', !soundEnabled);
+        iconOff.classList.toggle('hidden', soundEnabled);
+        if (soundEnabled) playSound('click');
+      });
+
+      // Export PPTX button
+      document.getElementById('btn-export-pptx').addEventListener('click', () => {
+        exportToPowerPoint();
+      });
+
+      // Mouse drag controls for 3D Globe
+      const container = document.getElementById('globe-container');
+      container.addEventListener('mousedown', (e) => {
+        isDragging = true;
+        prevMouseX = e.clientX;
+        prevMouseY = e.clientY;
+      });
+      window.addEventListener('mouseup', () => {
+        isDragging = false;
+      });
+      window.addEventListener('mousemove', (e) => {
+        if (!isDragging || currentSlideIndex === 3) return;
+        const deltaX = e.clientX - prevMouseX;
+        const deltaY = e.clientY - prevMouseY;
+        globeGroup.rotation.y += deltaX * 0.005;
+        globeGroup.rotation.x += deltaY * 0.005;
+        prevMouseX = e.clientX;
+        prevMouseY = e.clientY;
+      });
+    }
+
+    function onWindowResize() {
+      if (!camera || !renderer) return;
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+
+      const canvas = document.getElementById('falling-candies-canvas');
+      if (canvas) {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+      }
+    }
+
+    function animate() {
+      requestAnimationFrame(animate);
+
+      // Smooth camera interpolation
+      camera.position.lerp(targetCameraPos, 0.04);
+      camera.lookAt(targetLookAt);
+
+      // Gentle auto-rotation
+      if (isAutoRotating && currentSlideIndex !== 3) {
+        globeGroup.rotation.y += 0.0018;
+      }
+
+      // Orbital candy ring spin
+      if (candyRingGroup) {
+        candyRingGroup.rotation.z += 0.003;
+      }
+
+      // Pulse effects on pins
+      const time = performance.now() * 0.003;
+      pinObjects.forEach((p, idx) => {
+        const ring = p.userData.ringMesh;
+        const scale = 1 + Math.sin(time + idx * 2) * 0.18;
+        ring.scale.set(scale, scale, 1);
+      });
+
+      renderer.render(scene, camera);
+    }
+
+    window.onload = function () {
+      initThreeScene();
+      setupEventListeners();
+      goToSlide(0, false);
+      animate();
+    };
+  </script>
+</body>
+</html>
