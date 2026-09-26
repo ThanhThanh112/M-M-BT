@@ -254,23 +254,6 @@
           </div>
         </div>
       </div>
-
-      <!-- Slide Navigation Footer -->
-      <div class="flex items-center justify-between pt-2 border-t border-white/10 text-xs">
-        <button id="btn-channels-prev" class="px-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 font-bold text-white transition-all flex items-center space-x-1.5">
-          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"></path></svg>
-          <span class="hidden sm:inline">Trang trước</span>
-        </button>
-
-        <div id="channels-dots" class="flex items-center space-x-1.5">
-          <!-- Slide dots rendered dynamically -->
-        </div>
-
-        <button id="btn-channels-first" class="px-3.5 py-1.5 rounded-xl bg-mm-yellow hover:bg-yellow-400 text-stone-950 font-black transition-all shadow-md flex items-center space-x-1.5">
-          <span class="hidden sm:inline">Xem lại từ đầu (#1)</span>
-          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
-        </button>
-      </div>
     </div>
   </div>
 
@@ -349,24 +332,6 @@
         <span class="text-amber-200/60 font-medium">Chiến lược:</span>
         <span id="slide-highlight" class="font-semibold text-mm-yellow">Super Bowl & Cá nhân hóa khuôn mặt kẹo</span>
       </div>
-    </div>
-
-    <!-- Slide Navigation Controllers -->
-    <div class="flex items-center justify-between pt-2 border-t border-white/10">
-      <button id="btn-prev" class="px-4 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-xs font-bold transition-colors flex items-center space-x-1">
-        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"></path></svg>
-        <span>Trước</span>
-      </button>
-
-      <!-- Quick candy selector dots -->
-      <div id="slide-dots" class="flex items-center space-x-2">
-        <!-- Rendered dynamically -->
-      </div>
-
-      <button id="btn-next" class="px-4 py-2 rounded-xl bg-mm-yellow hover:bg-yellow-400 text-mm-dark text-xs font-extrabold transition-all shadow-md flex items-center space-x-1">
-        <span>Kế tiếp</span>
-        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"></path></svg>
-      </button>
     </div>
   </div>
 
@@ -1043,25 +1008,25 @@
       const slideCard = document.getElementById('slide-card');
 
       if (index === 3) {
-        channelsSlide.classList.remove('opacity-0', 'pointer-events-none');
+        channelsSlide.classList.remove('opacity-0', 'pointer-events-none', 'hidden');
         channelsSlide.classList.add('opacity-100', 'pointer-events-auto');
 
         globeContainer.classList.add('opacity-15', 'pointer-events-none');
-        slideCard.classList.add('opacity-0', 'pointer-events-none');
+        // Ẩn triệt để slide card để không bao giờ bị lộ ra phía sau ở slide 4
+        slideCard.classList.add('opacity-0', 'pointer-events-none', 'hidden');
 
         startFallingCandies();
-        renderSlideDots(3);
-        renderChannelsDots(3);
         if (triggerAudio) playSound('slide');
         return;
       }
 
       channelsSlide.classList.remove('opacity-100', 'pointer-events-auto');
-      channelsSlide.classList.add('opacity-0', 'pointer-events-none');
+      channelsSlide.classList.add('opacity-0', 'pointer-events-none', 'hidden');
       stopFallingCandies();
 
       globeContainer.classList.remove('opacity-15', 'pointer-events-none');
-      slideCard.classList.remove('opacity-0', 'pointer-events-none');
+      // Hiện lại slide card cho các slide 1, 2, 3
+      slideCard.classList.remove('opacity-0', 'pointer-events-none', 'hidden');
 
       const market = MM_MARKETS[index];
 
@@ -1121,50 +1086,9 @@
         document.getElementById('slide-channel').textContent = m.channel;
         document.getElementById('slide-highlight').textContent = m.highlight;
 
-        renderSlideDots(index);
-
         card.classList.remove('translate-y-4', 'opacity-0');
         card.classList.add('translate-y-0', 'opacity-100');
       }, 180);
-    }
-
-    function renderSlideDots(activeIndex) {
-      const container = document.getElementById('slide-dots');
-      container.innerHTML = '';
-      const dotLabels = ['#1', '#2', '#3', '📊'];
-      const dotTitles = ['Hoa Kỳ (Top 1)', 'Vương Quốc Anh (Top 2)', 'Trung Quốc (Top 3)', 'Kênh Phân Phối Toàn Cầu'];
-
-      for (let idx = 0; idx < 4; idx++) {
-        const dot = document.createElement('button');
-        dot.className = `h-3 rounded-full transition-all duration-300 flex items-center justify-center font-bold text-[10px] ${idx === activeIndex ? 'w-8 bg-mm-yellow text-stone-900 shadow-md' : 'w-3 bg-white/25 hover:bg-white/50 text-transparent'}`;
-        dot.textContent = dotLabels[idx];
-        dot.title = dotTitles[idx];
-        dot.addEventListener('click', () => {
-          isAutoRotating = false;
-          updateAutoRotateButtonState();
-          focusOnMarket(idx);
-        });
-        container.appendChild(dot);
-      }
-    }
-
-    function renderChannelsDots(activeIndex) {
-      const container = document.getElementById('channels-dots');
-      if (!container) return;
-      container.innerHTML = '';
-      const dotLabels = ['#1', '#2', '#3', '📊 Phân Phối'];
-
-      for (let idx = 0; idx < 4; idx++) {
-        const dot = document.createElement('button');
-        dot.className = `px-2.5 py-1 rounded-full transition-all duration-300 flex items-center justify-center font-bold text-[11px] ${idx === activeIndex ? 'bg-mm-yellow text-stone-950 shadow-md ring-2 ring-amber-300' : 'bg-white/10 hover:bg-white/20 text-amber-200'}`;
-        dot.textContent = dotLabels[idx];
-        dot.addEventListener('click', () => {
-          isAutoRotating = false;
-          updateAutoRotateButtonState();
-          focusOnMarket(idx);
-        });
-        container.appendChild(dot);
-      }
     }
 
     let previousMousePosition = { x: 0, y: 0 };
@@ -1284,8 +1208,10 @@
         focusOnMarket(next);
       }
 
-      document.getElementById('btn-prev').addEventListener('click', goToPrevSlide);
-      document.getElementById('btn-next').addEventListener('click', goToNextSlide);
+      const btnPrev = document.getElementById('btn-prev');
+      const btnNext = document.getElementById('btn-next');
+      if (btnPrev) btnPrev.addEventListener('click', goToPrevSlide);
+      if (btnNext) btnNext.addEventListener('click', goToNextSlide);
 
       // PowerPoint-style Edge Navigation Buttons (Left & Right screen edges)
       const navLeft = document.getElementById('screen-nav-left');
@@ -1329,20 +1255,6 @@
       const backToGlobeBtn = document.getElementById('btn-back-to-globe');
       if (backToGlobeBtn) {
         backToGlobeBtn.addEventListener('click', () => {
-          focusOnMarket(0);
-        });
-      }
-
-      const channelsPrevBtn = document.getElementById('btn-channels-prev');
-      if (channelsPrevBtn) {
-        channelsPrevBtn.addEventListener('click', () => {
-          focusOnMarket(2);
-        });
-      }
-
-      const channelsFirstBtn = document.getElementById('btn-channels-first');
-      if (channelsFirstBtn) {
-        channelsFirstBtn.addEventListener('click', () => {
           focusOnMarket(0);
         });
       }
@@ -1400,7 +1312,6 @@
 
     window.onload = function () {
       initThreeScene();
-      renderSlideDots(0);
       setupInteractionListeners();
       setupToolbarButtons();
 
