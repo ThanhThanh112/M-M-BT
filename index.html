@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="vi" class="h-full">
+<html lang="vi">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,189 +10,357 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
   <!-- Tone.js for synthesized presentation sound effects -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.min.js"></script>
-  <!-- PptxGenJS library for client-side PowerPoint generation -->
-  <script src="https://cdn.jsdelivr.net/npm/pptxgenjs@3.12.0/dist/pptxgen.bundle.js"></script>
   <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800;900&family=Paytone+One&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Fredoka:wght@600;700&display=swap" rel="stylesheet">
 
   <script>
     tailwind.config = {
       theme: {
         extend: {
-          colors: {
-            mm: {
-              red: '#E01A22',
-              yellow: '#FDB813',
-              blue: '#0066B2',
-              green: '#009639',
-              orange: '#F58220',
-              brown: '#4A2311',
-              dark: '#1c1008',
-              card: 'rgba(28, 16, 8, 0.88)'
-            }
-          },
           fontFamily: {
             sans: ['"Plus Jakarta Sans"', 'sans-serif'],
-            brand: ['"Paytone One"', 'cursive']
+            brand: ['"Fredoka"', 'sans-serif'],
+          },
+          colors: {
+            mm: {
+              brown: '#4A2311',
+              dark: '#261208',
+              red: '#E01E26',
+              yellow: '#FDB913',
+              blue: '#0066B2',
+              green: '#009639',
+              orange: '#F58220'
+            }
           }
         }
       }
-    };
+    }
   </script>
-
   <style>
     body {
-      background: radial-gradient(circle at 50% 50%, #2b1407 0%, #150a04 60%, #080301 100%);
-      color: #fff;
+      margin: 0;
       overflow: hidden;
-      user-select: none;
+      background: radial-gradient(circle at 60% 40%, #2f170c 0%, #150904 60%, #080301 100%);
       font-family: 'Plus Jakarta Sans', sans-serif;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+    canvas {
+      display: block;
+      width: 100vw;
+      height: 100vh;
+      outline: none;
     }
     .glass-card {
-      background: rgba(28, 16, 8, 0.85);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      border: 1px solid rgba(253, 184, 19, 0.25);
-      box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.7), 0 0 25px rgba(253, 184, 19, 0.08);
+      background: rgba(38, 18, 8, 0.78);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      border: 1px solid rgba(253, 185, 19, 0.25);
     }
-    .side-nav-zone {
-      transition: background-color 0.2s ease, opacity 0.2s ease;
+    .candy-shadow {
+      box-shadow: 0 10px 30px -5px rgba(245, 130, 32, 0.35);
     }
-    .side-nav-zone:hover {
-      background-color: rgba(253, 184, 19, 0.08);
+    ::-webkit-scrollbar {
+      width: 4px;
     }
-    .candy-dot {
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    ::-webkit-scrollbar-track {
+      background: rgba(38, 18, 8, 0.4);
     }
-    .candy-dot.active {
-      transform: scale(1.35);
-      box-shadow: 0 0 14px rgba(253, 184, 19, 0.8);
-      border-color: #fff;
+    ::-webkit-scrollbar-thumb {
+      background: #FDB913;
+      border-radius: 999px;
     }
   </style>
 </head>
-<body class="h-full w-full relative flex flex-col justify-between">
+<body class="text-amber-50">
 
-  <canvas id="falling-candies-canvas" class="absolute inset-0 pointer-events-none z-0 opacity-0 transition-opacity duration-700"></canvas>
-
-  <div id="globe-container" class="absolute inset-0 z-0 cursor-grab active:cursor-grabbing transition-opacity duration-700"></div>
-
-  <header class="relative z-20 w-full px-4 sm:px-6 py-3.5 flex items-center justify-between pointer-events-none">
-    <div class="pointer-events-auto flex items-center space-x-3">
-      <div class="w-10 h-10 rounded-full bg-mm-red border-2 border-white shadow-lg flex items-center justify-center transform -rotate-12 hover:rotate-0 transition-transform">
-        <span class="font-brand text-white text-xl leading-none">m</span>
+  <!-- Header Branding Bar -->
+  <header class="absolute top-0 left-0 w-full z-20 pointer-events-none p-4 md:p-6 flex justify-between items-center">
+    <div class="flex items-center space-x-3 pointer-events-auto">
+      <div class="w-10 h-10 md:w-12 md:h-12 rounded-full bg-mm-red flex items-center justify-center font-brand text-2xl font-bold text-white shadow-lg border-2 border-white/40 transform -rotate-12 hover:rotate-0 transition-transform cursor-pointer">
+        m
       </div>
       <div>
         <div class="flex items-center space-x-2">
-          <h1 class="font-brand text-2xl tracking-wider text-mm-yellow drop-shadow">M&M's</h1>
-          <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold uppercase bg-amber-500/20 text-amber-300 border border-amber-400/30 tracking-widest">Global Report</span>
+          <span class="font-brand text-2xl md:text-3xl font-extrabold tracking-wide text-mm-yellow drop-shadow-md">M&M's</span>
+          <span class="bg-gradient-to-r from-amber-400 via-mm-red to-mm-yellow text-xs font-bold uppercase tracking-widest px-2.5 py-0.5 rounded-full text-white shadow">GLOBAL SALES REPORT</span>
         </div>
+        <p class="text-xs text-amber-200/70 hidden sm:block">Số liệu thị trường và hệ thống phân phối sô-cô-la M&M's toàn cầu</p>
       </div>
     </div>
 
+    <!-- Presentation Controls Right -->
     <div class="pointer-events-auto flex items-center space-x-2 sm:space-x-3">
       <button id="btn-sound" class="p-2.5 rounded-xl glass-card hover:border-mm-yellow/70 transition-colors text-amber-200 hover:text-white" title="Bật/Tắt Âm thanh">
         <svg id="sound-icon-on" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"></path></svg>
         <svg id="sound-icon-off" class="w-5 h-5 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z m12 1l4 4m0-4l-4 4"></path></svg>
       </button>
 
-      <button id="btn-auto-rotate" class="px-3.5 py-2 text-xs font-semibold rounded-xl glass-card border border-amber-500/30 hover:border-mm-yellow transition-all flex items-center space-x-1.5 text-amber-100">
+      <button id="btn-auto-rotate" class="px-3 py-2 text-xs font-semibold rounded-xl glass-card border border-amber-500/30 hover:border-mm-yellow transition-all flex items-center space-x-1.5 text-amber-100">
         <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
-        <span id="rotate-label">Xoay tự động: Bật</span>
-      </button>
-
-      <button id="btn-presentation-mode" class="px-3.5 py-2 text-xs md:text-sm font-bold rounded-xl bg-gradient-to-r from-mm-red to-mm-orange hover:from-red-600 hover:to-orange-500 text-white shadow-lg transition-transform active:scale-95 flex items-center space-x-1.5">
-        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M4 4a2 2 0 012-2h8a2 2 0 012 2v12a1 1 0 01-1.581.814L10 13.175l-4.419 3.639A1 1 0 014 16V4z"></path></svg>
-        <span>Chế độ Slide Tour</span>
-      </button>
-
-      <!-- Prominent PowerPoint Export Button -->
-      <button id="btn-export-pptx" class="px-3.5 py-2 text-xs md:text-sm font-black rounded-xl bg-gradient-to-r from-amber-400 to-yellow-500 hover:from-amber-300 hover:to-yellow-400 text-stone-950 shadow-lg shadow-amber-500/20 transition-all active:scale-95 flex items-center space-x-1.5 border border-yellow-300">
-        <svg class="w-4 h-4 text-stone-950" fill="currentColor" viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
-        <span>Xuất File PPTX</span>
+        <span id="rotate-label">Xoay: Bật</span>
       </button>
     </div>
   </header>
 
-  <button id="nav-side-prev" class="side-nav-zone absolute left-0 top-16 bottom-0 w-16 sm:w-20 z-20 flex items-center justify-start pl-3 text-white/40 hover:text-white group focus:outline-none transition-all" title="Trang trước (←)">
-    <div class="p-3 rounded-full bg-black/40 group-hover:bg-amber-500/80 group-hover:text-stone-950 transition-all transform group-hover:-translate-x-1 border border-white/10 group-hover:border-amber-300 shadow-xl">
-      <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"></path></svg>
+  <!-- Slide 4: Compact 16:9 PowerPoint Slide (Zero scroll, perfectly fitted) -->
+  <div id="channels-slide" class="absolute inset-0 z-30 transition-all duration-700 opacity-0 pointer-events-none flex items-center justify-center p-3 md:p-6 pt-16 md:pt-16">
+    <!-- 2D Canvas for falling M&M candies -->
+    <canvas id="falling-candies-canvas" class="absolute inset-0 w-full h-full pointer-events-none"></canvas>
+
+    <!-- Presentation Slide Card Container (Strict 16:9 / viewport fit) -->
+    <div class="relative z-10 w-full max-w-5xl h-[84vh] max-h-[640px] glass-card rounded-3xl p-4 md:p-6 shadow-2xl border border-amber-400/30 bg-black/85 backdrop-blur-2xl flex flex-col justify-between overflow-hidden">
+      <!-- Slide Header -->
+      <div class="flex items-center justify-between pb-3 border-b border-amber-400/20">
+        <div>
+          <div class="flex items-center space-x-2">
+            <span class="bg-gradient-to-r from-mm-yellow to-mm-orange text-stone-950 font-black text-[10px] md:text-xs px-2.5 py-0.5 rounded-full uppercase tracking-wider shadow">
+              PHÂN PHỐI ĐA KÊNH TOÀN CẦU
+            </span>
+            <span class="text-[10px] md:text-xs font-mono text-emerald-400 bg-emerald-950/60 border border-emerald-500/30 px-2 py-0.5 rounded-full hidden sm:inline-block">
+              1.8M+ Điểm bán • 180+ Quốc gia
+            </span>
+          </div>
+          <h1 class="text-xl md:text-2xl lg:text-3xl font-brand font-extrabold text-white mt-1 flex items-center">
+            Ma Trận Kênh Phân Phối & Doanh Thu M&M's
+            <span class="ml-2 text-lg md:text-xl">🍬</span>
+          </h1>
+        </div>
+
+        <button id="btn-back-to-globe" class="px-3 py-1.5 text-xs font-bold rounded-xl bg-white/10 hover:bg-white/20 text-amber-200 hover:text-white transition-all flex items-center space-x-1.5 border border-white/10 shrink-0">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+          <span class="hidden sm:inline">Quay lại Địa Cầu</span>
+        </button>
+      </div>
+
+      <!-- Quick KPI Row (Compact 4-column cards) -->
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-2.5 my-2">
+        <div class="bg-stone-900/80 border border-amber-400/20 rounded-xl px-3 py-2">
+          <div class="text-[10px] text-amber-200/60 font-medium">Tổng Doanh Thu</div>
+          <div class="text-base md:text-lg font-brand font-bold text-mm-yellow">$3.40+ Tỷ USD</div>
+          <div class="text-[9px] text-emerald-400 font-semibold">+6.8% YoY</div>
+        </div>
+
+        <div class="bg-stone-900/80 border border-amber-400/20 rounded-xl px-3 py-2">
+          <div class="text-[10px] text-amber-200/60 font-medium">Kênh Dẫn Đầu</div>
+          <div class="text-base md:text-lg font-brand font-bold text-white">Siêu Thị (42%)</div>
+          <div class="text-[9px] text-amber-300 font-semibold">$1.43 Tỷ USD</div>
+        </div>
+
+        <div class="bg-stone-900/80 border border-amber-400/20 rounded-xl px-3 py-2">
+          <div class="text-[10px] text-amber-200/60 font-medium">Tăng Nhanh Nhất</div>
+          <div class="text-base md:text-lg font-brand font-bold text-sky-400">E-Commerce</div>
+          <div class="text-[9px] text-emerald-400 font-semibold">+22.5% Bùng nổ D2C</div>
+        </div>
+
+        <div class="bg-stone-900/80 border border-amber-400/20 rounded-xl px-3 py-2">
+          <div class="text-[10px] text-amber-200/60 font-medium">Flagship & Giải Trí</div>
+          <div class="text-base md:text-lg font-brand font-bold text-emerald-400">18% Toàn Cầu</div>
+          <div class="text-[9px] text-amber-200/60 font-semibold">M&M's World & AMC</div>
+        </div>
+      </div>
+
+      <!-- Compact 5-Channel Distribution Matrix Chart -->
+      <div class="bg-stone-950/80 border border-white/10 rounded-2xl p-3 md:p-4 space-y-2 md:space-y-2.5 my-1 flex-1 flex flex-col justify-center">
+        <!-- Channel 1: Hypermarkets & Supermarkets -->
+        <div class="bg-black/40 rounded-lg p-2 border border-white/5 hover:border-amber-400/30 transition-all">
+          <div class="flex justify-between items-center text-xs mb-1">
+            <span class="font-bold text-white flex items-center truncate mr-2">
+              <span class="w-2.5 h-2.5 rounded-full bg-amber-400 inline-block mr-2 shrink-0"></span>
+              Siêu thị & Đại siêu thị (Walmart, Target, Tesco, Carrefour)
+            </span>
+            <div class="space-x-2 font-mono shrink-0">
+              <span class="text-mm-yellow font-extrabold">42.0%</span>
+              <span class="text-amber-200 font-semibold text-[11px]">($1.43B)</span>
+              <span class="text-emerald-400 font-bold text-[10px] bg-emerald-950/60 px-1.5 py-0.5 rounded">+4.2%</span>
+            </div>
+          </div>
+          <div class="w-full bg-stone-900 h-2 md:h-2.5 rounded-full overflow-hidden p-0.5">
+            <div class="bg-gradient-to-r from-amber-500 to-yellow-400 h-full rounded-full transition-all duration-700" style="width: 42%"></div>
+          </div>
+        </div>
+
+        <!-- Channel 2: Convenience Stores & Gas Stations -->
+        <div class="bg-black/40 rounded-lg p-2 border border-white/5 hover:border-blue-400/30 transition-all">
+          <div class="flex justify-between items-center text-xs mb-1">
+            <span class="font-bold text-white flex items-center truncate mr-2">
+              <span class="w-2.5 h-2.5 rounded-full bg-blue-500 inline-block mr-2 shrink-0"></span>
+              Cửa hàng tiện lợi & Trạm xăng (7-Eleven, Circle K, FamilyMart)
+            </span>
+            <div class="space-x-2 font-mono shrink-0">
+              <span class="text-sky-400 font-extrabold">24.0%</span>
+              <span class="text-amber-200 font-semibold text-[11px]">($815M)</span>
+              <span class="text-emerald-400 font-bold text-[10px] bg-emerald-950/60 px-1.5 py-0.5 rounded">+5.8%</span>
+            </div>
+          </div>
+          <div class="w-full bg-stone-900 h-2 md:h-2.5 rounded-full overflow-hidden p-0.5">
+            <div class="bg-gradient-to-r from-blue-600 to-sky-400 h-full rounded-full transition-all duration-700" style="width: 24%"></div>
+          </div>
+        </div>
+
+        <!-- Channel 3: E-commerce & Direct-to-Consumer -->
+        <div class="bg-black/40 rounded-lg p-2 border border-white/5 hover:border-rose-400/30 transition-all">
+          <div class="flex justify-between items-center text-xs mb-1">
+            <span class="font-bold text-white flex items-center truncate mr-2">
+              <span class="w-2.5 h-2.5 rounded-full bg-rose-500 inline-block mr-2 shrink-0"></span>
+              Thương mại điện tử & D2C (Amazon, Tmall, M&M's In hình cá nhân)
+            </span>
+            <div class="space-x-2 font-mono shrink-0">
+              <span class="text-rose-400 font-extrabold">16.0%</span>
+              <span class="text-amber-200 font-semibold text-[11px]">($545M)</span>
+              <span class="text-emerald-400 font-bold text-[10px] bg-emerald-950/80 px-1.5 py-0.5 rounded">+22.5%</span>
+            </div>
+          </div>
+          <div class="w-full bg-stone-900 h-2 md:h-2.5 rounded-full overflow-hidden p-0.5">
+            <div class="bg-gradient-to-r from-rose-600 to-mm-red h-full rounded-full transition-all duration-700" style="width: 16%"></div>
+          </div>
+        </div>
+
+        <!-- Channel 4: Flagship Experience & Travel Retail -->
+        <div class="bg-black/40 rounded-lg p-2 border border-white/5 hover:border-amber-500/30 transition-all">
+          <div class="flex justify-between items-center text-xs mb-1">
+            <span class="font-bold text-white flex items-center truncate mr-2">
+              <span class="w-2.5 h-2.5 rounded-full bg-amber-600 inline-block mr-2 shrink-0"></span>
+              Flagship M&M's World & Miễn thuế (NYC, London, Thượng Hải, Sân bay)
+            </span>
+            <div class="space-x-2 font-mono shrink-0">
+              <span class="text-amber-400 font-extrabold">10.0%</span>
+              <span class="text-amber-200 font-semibold text-[11px]">($340M)</span>
+              <span class="text-emerald-400 font-bold text-[10px] bg-emerald-950/60 px-1.5 py-0.5 rounded">+14.1%</span>
+            </div>
+          </div>
+          <div class="w-full bg-stone-900 h-2 md:h-2.5 rounded-full overflow-hidden p-0.5">
+            <div class="bg-gradient-to-r from-amber-700 to-orange-500 h-full rounded-full transition-all duration-700" style="width: 10%"></div>
+          </div>
+        </div>
+
+        <!-- Channel 5: Cinema, Entertainment & Vending -->
+        <div class="bg-black/40 rounded-lg p-2 border border-white/5 hover:border-emerald-400/30 transition-all">
+          <div class="flex justify-between items-center text-xs mb-1">
+            <span class="font-bold text-white flex items-center truncate mr-2">
+              <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 inline-block mr-2 shrink-0"></span>
+              Rạp chiếu phim & Bán hàng tự động (AMC, Regal Cinemas & Vending)
+            </span>
+            <div class="space-x-2 font-mono shrink-0">
+              <span class="text-emerald-400 font-extrabold">8.0%</span>
+              <span class="text-amber-200 font-semibold text-[11px]">($275M)</span>
+              <span class="text-emerald-400 font-bold text-[10px] bg-emerald-950/60 px-1.5 py-0.5 rounded">+3.5%</span>
+            </div>
+          </div>
+          <div class="w-full bg-stone-900 h-2 md:h-2.5 rounded-full overflow-hidden p-0.5">
+            <div class="bg-gradient-to-r from-emerald-600 to-green-400 h-full rounded-full transition-all duration-700" style="width: 8%"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Slide Navigation Footer -->
+      <div class="flex items-center justify-between pt-2 border-t border-white/10 text-xs">
+        <button id="btn-channels-prev" class="px-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 font-bold text-white transition-all flex items-center space-x-1.5">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"></path></svg>
+          <span class="hidden sm:inline">Trang trước</span>
+        </button>
+
+        <div id="channels-dots" class="flex items-center space-x-1.5">
+          <!-- Slide dots rendered dynamically -->
+        </div>
+
+        <button id="btn-channels-first" class="px-3.5 py-1.5 rounded-xl bg-mm-yellow hover:bg-yellow-400 text-stone-950 font-black transition-all shadow-md flex items-center space-x-1.5">
+          <span class="hidden sm:inline">Xem lại từ đầu (#1)</span>
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+        </button>
+      </div>
     </div>
+  </div>
+
+  <!-- PowerPoint-style Side Navigation Buttons (Left = Previous, Right = Next) -->
+  <button id="screen-nav-left" class="fixed left-2 md:left-4 top-1/2 -translate-y-1/2 z-40 p-3 md:p-4 rounded-2xl glass-card text-amber-200 hover:text-white hover:border-mm-yellow/80 hover:bg-amber-500/20 active:scale-95 transition-all shadow-2xl group" title="Slide trước (Bấm mép trái hoặc phím ←)">
+    <svg class="w-6 h-6 md:w-8 md:h-8 transform group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M15 19l-7-7 7-7"></path>
+    </svg>
+    <span class="sr-only">Trang trước</span>
   </button>
 
-  <button id="nav-side-next" class="side-nav-zone absolute right-0 top-16 bottom-0 w-16 sm:w-20 z-20 flex items-center justify-end pr-3 text-white/40 hover:text-white group focus:outline-none transition-all" title="Trang sau (→)">
-    <div class="p-3 rounded-full bg-black/40 group-hover:bg-amber-500/80 group-hover:text-stone-950 transition-all transform group-hover:translate-x-1 border border-white/10 group-hover:border-amber-300 shadow-xl">
-      <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"></path></svg>
-    </div>
+  <button id="screen-nav-right" class="fixed right-2 md:right-4 top-1/2 -translate-y-1/2 z-40 p-3 md:p-4 rounded-2xl glass-card text-amber-200 hover:text-white hover:border-mm-yellow/80 hover:bg-amber-500/20 active:scale-95 transition-all shadow-2xl group" title="Slide kế tiếp (Bấm mép phải hoặc phím → / Space)">
+    <svg class="w-6 h-6 md:w-8 md:h-8 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M9 5l7 7-7 7"></path>
+    </svg>
+    <span class="sr-only">Trang kế tiếp</span>
   </button>
 
-  <div id="slide-card" class="relative z-10 mx-6 sm:mx-12 md:mx-16 mb-6 max-w-lg glass-card rounded-2xl p-5 sm:p-6 transition-all duration-500 shadow-2xl pointer-events-auto">
+  <!-- Three.js Canvas Container -->
+  <div id="globe-container" class="absolute inset-0 cursor-grab active:cursor-grabbing transition-opacity duration-700"></div>
+
+  <!-- Main Slide Display Card (Left / Bottom-Left on desktop - Completely isolated, no preview of next slides) -->
+  <div id="slide-card" class="absolute left-4 md:left-16 bottom-16 md:bottom-10 z-20 w-[calc(100vw-2rem)] sm:w-[430px] md:w-[470px] glass-card rounded-3xl p-5 md:p-6 shadow-2xl transition-all duration-500 transform translate-y-0 opacity-100">
     <!-- Top badge -->
     <div class="flex items-center justify-between mb-3">
-      <div id="slide-rank-badge" class="flex items-center space-x-1.5 px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider bg-amber-500/20 text-amber-300 border border-amber-400/40">
-        <span>🏆 #1 VÔ ĐỊCH TOÀN CẦU</span>
+      <div class="flex items-center space-x-2">
+        <span id="slide-rank-badge" class="px-3 py-1 rounded-full text-xs font-black shadow-md flex items-center space-x-1.5">
+          <span id="slide-rank-medal">🥇</span>
+          <span id="slide-rank-title">TOP 1 TOÀN CẦU</span>
+        </span>
+        <span id="slide-code" class="text-xs font-mono text-amber-300/80 bg-black/40 px-2 py-0.5 rounded">USA</span>
       </div>
-      <span id="slide-country-code" class="text-xs font-bold text-amber-200/60 uppercase tracking-widest">USA</span>
     </div>
 
-    <!-- Country Name & Subtitle -->
-    <div class="mb-4">
-      <h2 id="slide-country-name" class="font-brand text-2xl sm:text-3xl text-white tracking-wide leading-tight">Hoa Kỳ (United States)</h2>
-      <p id="slide-subtitle" class="text-xs text-amber-300 font-semibold mt-1">Newark (Mars HQ) & Toàn Quốc</p>
+    <!-- Country Title & Region -->
+    <div class="flex items-baseline space-x-3 mb-2">
+      <h2 id="slide-country" class="font-brand text-2xl md:text-3xl font-extrabold text-white tracking-wide">Hoa Kỳ (United States)</h2>
+      <span id="slide-city" class="text-sm font-semibold text-mm-orange">Toàn quốc & Newark HQ</span>
     </div>
 
-    <!-- Summary description -->
-    <p id="slide-description" class="text-xs sm:text-sm text-stone-300 leading-relaxed mb-4">
-      Hoa Kỳ là thánh địa khai sinh thương hiệu năm 1941 và là thị trường tiêu thụ số 1 không thể lay chuyển, đóng góp hơn 45% tổng sản lượng tiêu thụ M&M's toàn cầu.
+    <p id="slide-description" class="text-xs md:text-sm text-amber-100/90 leading-relaxed mb-4">
+      Thị trường quê hương và quy mô doanh thu lớn nhất của M&M's. Đóng vai trò hạt nhân trong việc ra mắt các dòng phiên bản đặc biệt và sở hữu chuỗi cửa hàng trải nghiệm Flagship M&M's World lớn nhất.
     </p>
 
-    <!-- Stats Matrix -->
-    <div class="grid grid-cols-2 gap-3 mb-4">
-      <div class="bg-black/40 rounded-xl p-3 border border-amber-500/20">
-        <span class="text-[10px] uppercase font-bold text-amber-400/80 tracking-wider block">Doanh thu ước tính/năm</span>
-        <div class="flex items-baseline space-x-1 mt-0.5">
-          <span id="slide-stat-revenue" class="font-brand text-xl sm:text-2xl text-amber-300">$2.55 Tỷ</span>
-          <span class="text-xs text-stone-400">USD</span>
+    <!-- Metrics Grid -->
+    <div class="grid grid-cols-2 gap-2.5 mb-3">
+      <div class="bg-black/40 rounded-2xl p-3 border border-amber-400/20 shadow-inner">
+        <div class="text-[11px] text-amber-200/70 font-medium">Doanh thu ước tính năm</div>
+        <div id="slide-revenue" class="text-xl md:text-2xl font-brand font-bold text-mm-yellow mt-0.5">$2.55 Tỷ USD</div>
+        <div class="text-[10px] text-emerald-400 flex items-center mt-0.5">
+          <svg class="w-3 h-3 mr-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg>
+          <span id="slide-growth">+5.9% YoY</span>
         </div>
-        <span id="slide-stat-growth" class="text-[10px] text-emerald-400 font-semibold mt-1 block">↗ +5.9% YoY so với năm trước</span>
       </div>
 
-      <div class="bg-black/40 rounded-xl p-3 border border-amber-500/20">
-        <span class="text-[10px] uppercase font-bold text-amber-400/80 tracking-wider block">Thị phần phân khúc viên ngọt</span>
-        <div class="flex items-baseline space-x-1 mt-0.5">
-          <span id="slide-stat-share" class="font-brand text-xl sm:text-2xl text-mm-red">38.5%</span>
-        </div>
-        <span id="slide-stat-rank" class="text-[10px] text-amber-300/80 font-semibold mt-1 block">#1 Tuyệt đối mọi bang tại Mỹ</span>
+      <div class="bg-black/40 rounded-2xl p-3 border border-amber-400/20 shadow-inner">
+        <div class="text-[11px] text-amber-200/70 font-medium">Thị phần phân khúc viên ngọt</div>
+        <div id="slide-share" class="text-xl md:text-2xl font-brand font-bold text-mm-red mt-0.5">38.5%</div>
+        <div id="slide-rank-text" class="text-[10px] text-amber-300/80 mt-0.5">Thống trị tuyệt đối thị phần</div>
       </div>
     </div>
 
-    <!-- Key highlights bullet points -->
-    <div class="space-y-1.5 text-xs text-stone-300 border-t border-white/10 pt-3 mb-4">
-      <div class="flex items-start space-x-2">
-        <span class="text-amber-400 font-bold shrink-0">Vị số 1:</span>
-        <span id="slide-flavor" class="text-white font-medium">Peanut & Peanut Butter</span>
+    <!-- Highlights & Key Products -->
+    <div class="space-y-1.5 mb-4 text-xs bg-amber-950/50 p-3 rounded-2xl border border-amber-400/20">
+      <div class="flex items-center justify-between">
+        <span class="text-amber-200/60 font-medium">Vị số 1:</span>
+        <span id="slide-top-flavor" class="font-bold text-amber-200 flex items-center">
+          <span class="w-2.5 h-2.5 rounded-full bg-mm-yellow inline-block mr-1.5"></span> Peanut & Milk Chocolate
+        </span>
       </div>
-      <div class="flex items-start space-x-2">
-        <span class="text-amber-400 font-bold shrink-0">Kênh bán:</span>
-        <span id="slide-channels" class="text-stone-300">Wal-Mart, Target, Rạp AMC & M&M's World New York/Vegas</span>
+      <div class="flex items-center justify-between">
+        <span class="text-amber-200/60 font-medium">Kênh bán:</span>
+        <span id="slide-channel" class="font-semibold text-white">Siêu thị, Rạp phim & Flagship World</span>
       </div>
-      <div class="flex items-start space-x-2">
-        <span class="text-amber-400 font-bold shrink-0">Chiến lược:</span>
-        <span id="slide-strategy" class="text-stone-300">Chiến dịch Super Bowl hơn 20 năm & M&M's in hình cá nhân theo yêu cầu</span>
+      <div class="flex items-center justify-between">
+        <span class="text-amber-200/60 font-medium">Chiến lược:</span>
+        <span id="slide-highlight" class="font-semibold text-mm-yellow">Super Bowl & Cá nhân hóa khuôn mặt kẹo</span>
       </div>
     </div>
 
-    <!-- Navigation Footer in card -->
+    <!-- Slide Navigation Controllers -->
     <div class="flex items-center justify-between pt-2 border-t border-white/10">
       <button id="btn-prev" class="px-4 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-xs font-bold transition-colors flex items-center space-x-1">
         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"></path></svg>
         <span>Trước</span>
       </button>
 
+      <!-- Quick candy selector dots -->
       <div id="slide-dots" class="flex items-center space-x-2">
-        <!-- Dots injected dynamically -->
+        <!-- Rendered dynamically -->
       </div>
 
       <button id="btn-next" class="px-4 py-2 rounded-xl bg-mm-yellow hover:bg-yellow-400 text-mm-dark text-xs font-extrabold transition-all shadow-md flex items-center space-x-1">
@@ -202,476 +370,397 @@
     </div>
   </div>
 
-  <div id="slide-channels-container" class="absolute inset-0 z-10 flex items-center justify-center p-4 sm:p-6 opacity-0 pointer-events-none transition-opacity duration-700">
-    <div class="w-full max-w-5xl glass-card rounded-3xl p-5 sm:p-7 shadow-2xl border border-amber-500/30 flex flex-col justify-between" style="max-height: calc(100vh - 110px);">
-      <!-- Slide Header -->
-      <div class="flex items-center justify-between border-b border-white/10 pb-3">
-        <div>
-          <div class="flex items-center space-x-2">
-            <span class="w-2.5 h-2.5 rounded-full bg-mm-yellow"></span>
-            <span class="text-xs uppercase font-extrabold tracking-widest text-amber-300">Hệ Thống Phân Phối Toàn Cầu</span>
-          </div>
-          <h2 class="font-brand text-2xl sm:text-3xl text-white tracking-wide mt-0.5">5 Kênh Bán Hàng Trọng Tâm M&M's</h2>
-        </div>
-        <div class="text-right">
-          <span class="text-xs text-amber-200/80 font-bold">Tổng doanh thu hệ thống</span>
-          <p class="font-brand text-2xl text-amber-400 leading-none mt-0.5">~$3.48 Tỷ USD</p>
-        </div>
-      </div>
+  <script>
+    // Falling M&M Candies Physics Animation for Slide 4
+    let fallingCandiesAnimId = null;
+    let candiesArray = [];
+    const fallingCanvas = document.getElementById('falling-candies-canvas');
+    let fallingCtx = null;
 
-      <!-- Key KPI Cards -->
-      <div class="grid grid-cols-3 gap-3 my-3">
-        <div class="bg-black/50 rounded-xl p-2.5 border border-amber-500/20 text-center">
-          <span class="text-[10px] text-stone-400 uppercase font-bold tracking-wider block">Điểm bán lẻ toàn cầu (POS)</span>
-          <span class="font-brand text-lg sm:text-xl text-amber-300 mt-0.5 block">+1.8 Triệu</span>
-        </div>
-        <div class="bg-black/50 rounded-xl p-2.5 border border-amber-500/20 text-center">
-          <span class="text-[10px] text-stone-400 uppercase font-bold tracking-wider block">Kênh tăng tốc nhanh nhất</span>
-          <span class="font-brand text-lg sm:text-xl text-emerald-400 mt-0.5 block">E-Commerce (+22.5%)</span>
-        </div>
-        <div class="bg-black/50 rounded-xl p-2.5 border border-amber-500/20 text-center">
-          <span class="text-[10px] text-stone-400 uppercase font-bold tracking-wider block">Doanh thu mua ngẫu hứng</span>
-          <span class="font-brand text-lg sm:text-xl text-mm-red mt-0.5 block">66% Tổng Sản Lượng</span>
-        </div>
-      </div>
+    const CANDY_COLORS = [
+      { fill: '#E01E26', border: '#b01218', highlight: '#ff5c62' }, // Red
+      { fill: '#FDB913', border: '#cf9305', highlight: '#ffda66' }, // Yellow
+      { fill: '#0066B2', border: '#004780', highlight: '#4da6ff' }, // Blue
+      { fill: '#009639', border: '#006e29', highlight: '#33cc66' }, // Green
+      { fill: '#F58220', border: '#c7630e', highlight: '#ffa85c' }, // Orange
+      { fill: '#4A2311', border: '#301509', highlight: '#783b1e' }  // Brown
+    ];
 
-      <!-- Channels Progress Bars -->
-      <div class="space-y-2.5 my-1">
-        <!-- Channel 1 -->
-        <div class="bg-black/40 rounded-xl p-2.5 border border-white/5">
-          <div class="flex items-center justify-between text-xs mb-1">
-            <div class="flex items-center space-x-2">
-              <span class="w-3 h-3 rounded-full bg-amber-400 shrink-0"></span>
-              <span class="font-bold text-white">Siêu thị & Đại siêu thị (Supermarkets / Hypermarkets)</span>
-              <span class="text-[10px] text-stone-400 hidden sm:inline">(Walmart, Carrefour, Tesco, Costco)</span>
-            </div>
-            <div class="font-bold text-amber-300">42% <span class="text-stone-400 font-normal">($1.43 Tỷ USD)</span></div>
-          </div>
-          <div class="w-full bg-stone-900 rounded-full h-2 overflow-hidden">
-            <div class="bg-gradient-to-r from-amber-500 to-yellow-300 h-2 rounded-full" style="width: 42%;"></div>
-          </div>
-        </div>
+    function initFallingCandies() {
+      if (!fallingCanvas) return;
+      fallingCtx = fallingCanvas.getContext('2d');
+      resizeFallingCanvas();
+      window.addEventListener('resize', resizeFallingCanvas);
 
-        <!-- Channel 2 -->
-        <div class="bg-black/40 rounded-xl p-2.5 border border-white/5">
-          <div class="flex items-center justify-between text-xs mb-1">
-            <div class="flex items-center space-x-2">
-              <span class="w-3 h-3 rounded-full bg-mm-red shrink-0"></span>
-              <span class="font-bold text-white">Cửa hàng tiện lợi & Trạm xăng (C-Stores & Gas Stations)</span>
-              <span class="text-[10px] text-stone-400 hidden sm:inline">(7-Eleven, Circle K, Shell, BP)</span>
-            </div>
-            <div class="font-bold text-amber-300">24% <span class="text-stone-400 font-normal">($815 Triệu USD)</span></div>
-          </div>
-          <div class="w-full bg-stone-900 rounded-full h-2 overflow-hidden">
-            <div class="bg-gradient-to-r from-red-600 to-rose-400 h-2 rounded-full" style="width: 24%;"></div>
-          </div>
-        </div>
+      candiesArray = [];
+      const count = window.innerWidth < 768 ? 28 : 55;
+      for (let i = 0; i < count; i++) {
+        candiesArray.push(createFallingCandy(true));
+      }
+    }
 
-        <!-- Channel 3 -->
-        <div class="bg-black/40 rounded-xl p-2.5 border border-white/5">
-          <div class="flex items-center justify-between text-xs mb-1">
-            <div class="flex items-center space-x-2">
-              <span class="w-3 h-3 rounded-full bg-emerald-400 shrink-0"></span>
-              <span class="font-bold text-white">Thương mại điện tử & D2C (E-Commerce)</span>
-              <span class="text-[10px] text-stone-400 hidden sm:inline">(Amazon, Tmall, M&Ms.com D2C)</span>
-            </div>
-            <div class="font-bold text-emerald-400">16% <span class="text-stone-400 font-normal">($545 Triệu USD | +22.5% YoY)</span></div>
-          </div>
-          <div class="w-full bg-stone-900 rounded-full h-2 overflow-hidden">
-            <div class="bg-gradient-to-r from-emerald-500 to-teal-300 h-2 rounded-full" style="width: 16%;"></div>
-          </div>
-        </div>
+    function resizeFallingCanvas() {
+      if (!fallingCanvas) return;
+      fallingCanvas.width = window.innerWidth;
+      fallingCanvas.height = window.innerHeight;
+    }
 
-        <!-- Channel 4 -->
-        <div class="bg-black/40 rounded-xl p-2.5 border border-white/5">
-          <div class="flex items-center justify-between text-xs mb-1">
-            <div class="flex items-center space-x-2">
-              <span class="w-3 h-3 rounded-full bg-mm-blue shrink-0"></span>
-              <span class="font-bold text-white">M&M's World Stores & Miễn thuế Sân bay (Travel Retail)</span>
-              <span class="text-[10px] text-stone-400 hidden sm:inline">(New York, London, Shanghai, World Duty Free)</span>
-            </div>
-            <div class="font-bold text-amber-300">10% <span class="text-stone-400 font-normal">($340 Triệu USD)</span></div>
-          </div>
-          <div class="w-full bg-stone-900 rounded-full h-2 overflow-hidden">
-            <div class="bg-gradient-to-r from-blue-600 to-cyan-400 h-2 rounded-full" style="width: 10%;"></div>
-          </div>
-        </div>
+    function createFallingCandy(initialSpread = false) {
+      const w = fallingCanvas ? fallingCanvas.width : window.innerWidth;
+      const h = fallingCanvas ? fallingCanvas.height : window.innerHeight;
+      const radius = 12 + Math.random() * 16;
+      const colorObj = CANDY_COLORS[Math.floor(Math.random() * CANDY_COLORS.length)];
 
-        <!-- Channel 5 -->
-        <div class="bg-black/40 rounded-xl p-2.5 border border-white/5">
-          <div class="flex items-center justify-between text-xs mb-1">
-            <div class="flex items-center space-x-2">
-              <span class="w-3 h-3 rounded-full bg-mm-orange shrink-0"></span>
-              <span class="font-bold text-white">Rạp chiếu phim & Máy bán lẻ tự động (Cinemas & Vending)</span>
-              <span class="text-[10px] text-stone-400 hidden sm:inline">(AMC, Regal, Sân bay & Trường đại học)</span>
-            </div>
-            <div class="font-bold text-amber-300">8% <span class="text-stone-400 font-normal">($275 Triệu USD)</span></div>
-          </div>
-          <div class="w-full bg-stone-900 rounded-full h-2 overflow-hidden">
-            <div class="bg-gradient-to-r from-orange-500 to-amber-300 h-2 rounded-full" style="width: 8%;"></div>
-          </div>
-        </div>
-      </div>
+      return {
+        x: Math.random() * w,
+        y: initialSpread ? Math.random() * h : -radius * 2 - Math.random() * 50,
+        radius: radius,
+        color: colorObj,
+        speedY: 1.2 + Math.random() * 2.0,
+        speedX: (Math.random() - 0.5) * 0.9,
+        rotation: Math.random() * Math.PI * 2,
+        rotSpeed: (Math.random() - 0.5) * 0.04,
+        scaleY: 0.65 + Math.random() * 0.3,
+        wobble: Math.random() * Math.PI * 2,
+        wobbleSpeed: 0.02 + Math.random() * 0.03
+      };
+    }
 
-      <!-- Slide 4 Navigation Footer -->
-      <div class="flex items-center justify-between pt-3 border-t border-white/10 mt-2">
-        <button id="btn-channels-prev" class="px-4 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-xs font-bold transition-colors flex items-center space-x-1">
-          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"></path></svg>
-          <span>Trước</span>
-        </button>
+    function drawSingleCandy(ctx, candy) {
+      ctx.save();
+      ctx.translate(candy.x, candy.y);
+      ctx.rotate(candy.rotation);
+      ctx.scale(1, candy.scaleY);
 
-        <div id="channels-slide-dots" class="flex items-center space-x-2">
-          <!-- Dots rendered dynamically -->
-        </div>
+      ctx.shadowColor = 'rgba(0,0,0,0.35)';
+      ctx.shadowBlur = 8;
+      ctx.shadowOffsetY = 4;
 
-        <button id="btn-channels-next" class="px-4 py-2 rounded-xl bg-mm-yellow hover:bg-yellow-400 text-mm-dark text-xs font-extrabold transition-all shadow-md flex items-center space-x-1">
-          <span>Kế tiếp</span>
-          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"></path></svg>
-        </button>
-      </div>
-    </div>
-  </div>
+      ctx.beginPath();
+      ctx.arc(0, 0, candy.radius, 0, Math.PI * 2);
+      ctx.fillStyle = candy.color.fill;
+      ctx.fill();
+
+      ctx.shadowColor = 'transparent';
+      ctx.lineWidth = 1.2;
+      ctx.strokeStyle = candy.color.border;
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.arc(-candy.radius * 0.28, -candy.radius * 0.28, candy.radius * 0.45, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.28)';
+      ctx.fill();
+
+      ctx.fillStyle = '#ffffff';
+      ctx.font = `bold ${Math.round(candy.radius * 1.15)}px "Fredoka", sans-serif`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.shadowColor = 'rgba(0,0,0,0.25)';
+      ctx.shadowBlur = 3;
+      ctx.shadowOffsetY = 1;
+      ctx.fillText('m', 0, candy.radius * 0.05);
+
+      ctx.restore();
+    }
+
+    function updateAndRenderFallingCandies() {
+      if (!fallingCtx || !fallingCanvas) return;
+      fallingCtx.clearRect(0, 0, fallingCanvas.width, fallingCanvas.height);
+
+      for (let i = 0; i < candiesArray.length; i++) {
+        const c = candiesArray[i];
+        c.wobble += c.wobbleSpeed;
+        c.x += c.speedX + Math.sin(c.wobble) * 0.7;
+        c.y += c.speedY;
+        c.rotation += c.rotSpeed;
+
+        drawSingleCandy(fallingCtx, c);
+
+        if (c.y > fallingCanvas.height + c.radius * 2) {
+          candiesArray[i] = createFallingCandy(false);
+        }
+      }
+
+      fallingCandiesAnimId = requestAnimationFrame(updateAndRenderFallingCandies);
+    }
+
+    function startFallingCandies() {
+      if (!fallingCandiesAnimId) {
+        initFallingCandies();
+        updateAndRenderFallingCandies();
+      }
+    }
+
+    function stopFallingCandies() {
+      if (fallingCandiesAnimId) {
+        cancelAnimationFrame(fallingCandiesAnimId);
+        fallingCandiesAnimId = null;
+      }
+    }
+  </script>
 
   <script>
-    const TOP_MARKETS = [
+    const MM_MARKETS = [
       {
-        id: 'usa',
-        rank: '🏆 #1 VÔ ĐỊCH TOÀN CẦU',
-        code: 'USA',
-        name: 'Hoa Kỳ (United States)',
-        subtitle: 'Newark (Mars HQ) & Toàn Quốc',
-        lat: 40.7357,
-        lon: -74.1724,
-        revenue: '$2.55 Tỷ',
-        growth: '↗ +5.9% YoY so với năm trước',
-        share: '38.5%',
-        rankDesc: '#1 Tuyệt đối mọi bang tại Mỹ',
-        flavor: 'Peanut & Peanut Butter',
-        channels: 'Wal-Mart, Target, Rạp AMC & M&M\'s World New York/Vegas',
-        strategy: 'Chiến dịch Super Bowl hơn 20 năm & M&M\'s in hình cá nhân theo yêu cầu',
-        description: 'Hoa Kỳ là thánh địa khai sinh thương hiệu năm 1941 và là thị trường tiêu thụ số 1 không thể lay chuyển, đóng góp hơn 45% tổng sản lượng tiêu thụ M&M\'s toàn cầu.',
-        podiumColor: 0xFDB813
+        id: "usa",
+        code: "USA",
+        rank: 1,
+        medal: "🥇",
+        tier: "VÔ ĐỊCH TOÀN CẦU",
+        country: "Hoa Kỳ",
+        countryEn: "United States",
+        city: "Newark (Mars HQ) & Toàn Quốc",
+        lat: 38.8951,
+        lon: -77.0364,
+        revenue: "$2.55 Tỷ USD",
+        growth: "+5.9% YoY",
+        marketShare: "38.5%",
+        rankText: "#1 Tuyệt đối mọi bang tại Mỹ",
+        topFlavor: "Peanut & Peanut Butter",
+        flavorColor: "#FDB913",
+        color: 0xFDB913,
+        badgeColor: "bg-amber-400 text-stone-950",
+        channel: "Wal-Mart, Target, Rạp AMC & M&M's World New York/Vegas",
+        highlight: "Chiến dịch Super Bowl hơn 20 năm & M&M's in hình cá nhân theo yêu cầu",
+        description: "Hoa Kỳ là thánh địa khai sinh thương hiệu năm 1941 và là thị trường tiêu thụ số 1 không thể lay chuyển, đóng góp hơn 45% tổng sản lượng tiêu thụ M&M's toàn cầu."
       },
       {
-        id: 'gbr',
-        rank: '🥈 #2 THỊ TRƯỜNG CHÂU ÂU',
-        code: 'GBR',
-        name: 'Vương Quốc Anh (United Kingdom)',
-        subtitle: 'Slough Factory & London Flagship',
+        id: "uk",
+        code: "GBR",
+        rank: 2,
+        medal: "🥈",
+        tier: "THỊ TRƯỜNG SỐ 1 CHÂU ÂU",
+        country: "Vương Quốc Anh",
+        countryEn: "United Kingdom",
+        city: "London & Slough",
         lat: 51.5074,
         lon: -0.1278,
-        revenue: '$445 Triệu',
-        growth: '↗ +4.6% YoY nhu cầu ổn định',
-        share: '24.8%',
-        rankDesc: '#1 Thị trường bánh kẹo dạng viên tại Anh',
-        flavor: 'Crispy & Peanut (Crispy cực kỳ được yêu thích)',
-        channels: 'Tesco, Sainsbury\'s, Boots & M&M\'s World Leicester Square (London)',
-        strategy: 'Tập trung dòng kẹo Crispy giòn rụm và các gói chia sẻ túi lớn gia đình (Pouch Bags)',
-        description: 'Vương quốc Anh là thị trường châu Âu có mức tiêu thụ bình quân đầu người cao nhất. Cửa hàng M&M\'s World tại Quảng trường Leicester là một trong những điểm thu hút khách du lịch lớn nhất London.',
-        podiumColor: 0xE0E0E0
+        revenue: "$445 Triệu USD",
+        growth: "+4.6% YoY",
+        marketShare: "24.8%",
+        rankText: "Kẹo sô-cô-la chia sẻ bán chạy nhất UK",
+        topFlavor: "Crispy & Peanut M&M's",
+        flavorColor: "#0066B2",
+        color: 0x0066B2,
+        badgeColor: "bg-sky-400 text-stone-950",
+        channel: "Tesco, Sainsbury's, Cửa hàng M&M's London Quảng trường Leicester",
+        highlight: "Dòng kẹo M&M's Crispy giòn tan tạo cơn sốt kỷ lục nhiều năm liền",
+        description: "Vương quốc Anh là thị trường châu Âu mạnh nhất của tập đoàn Mars. Cửa hàng biểu tượng M&M's World tại London là thỏi nam châm du lịch đón hàng triệu khách quốc tế."
       },
       {
-        id: 'chn',
-        rank: '🥉 #3 TĂNG TRƯỞNG CHÂU Á',
-        code: 'CHN',
-        name: 'Trung Quốc (China)',
-        subtitle: 'Nhà máy Gia Hưng & Thượng Hải Flagship',
+        id: "china",
+        code: "CHN",
+        rank: 3,
+        medal: "🥉",
+        tier: "TĂNG TRƯỞNG NHANH NHẤT CHÂU Á",
+        country: "Trung Quốc",
+        countryEn: "China",
+        city: "Thượng Hải & Bắc Kinh",
         lat: 31.2304,
         lon: 121.4737,
-        revenue: '$410 Triệu',
-        growth: '🚀 +12.1% YoY tăng tốc nhanh nhất',
-        share: '19.2%',
-        rankDesc: 'Thương hiệu sô-cô-la quốc tế Top 3 tại đại lục',
-        flavor: 'Milk Chocolate & Dòng kẹo trà sữa giới hạn',
-        channels: 'Tmall, JD.com, siêu thị Yonghui & M&M\'s World Thượng Hải (Phố đi bộ Nam Kinh)',
-        strategy: 'Hộp quà Tết Nguyên Đán phiên bản đặc biệt và liên kết với các trò chơi di động đình đám',
-        description: 'Trung Quốc là động cơ tăng trưởng nhanh nhất của M&M\'s toàn cầu. Chiến lược số hóa, bán hàng qua Livestream thương mại điện tử kết hợp bao bì Tết đã mang lại doanh số đột phá.',
-        podiumColor: 0xCD7F32
+        revenue: "$410 Triệu USD",
+        growth: "+12.1% YoY",
+        marketShare: "19.4%",
+        rankText: "Kẹo ngoại nhập khẩu bán chạy số 1 TMĐT",
+        topFlavor: "Milk Chocolate & Vị Trà Xanh Độc Quyền",
+        flavorColor: "#E01E26",
+        color: 0xE01E26,
+        badgeColor: "bg-rose-500 text-white",
+        channel: "Tmall, JD.com, FamilyMart, M&M's World Thượng Hải (Phố Nam Kinh)",
+        highlight: "Bao bì Tết Nguyên Đán với Red & Yellow mặc áo sườn xám truyền thống",
+        description: "Trung Quốc bứt phá thần tốc vươn lên vị trí thứ 3 thế giới nhờ sự phủ sóng mạnh mẽ qua các lễ hội quà tặng, cửa hàng tiện lợi 24/7 và thương mại điện tử trực tuyến."
       }
     ];
 
-    const TOTAL_SLIDES = 4;
-    let currentSlideIndex = 0;
-    let isAutoRotating = true;
-    let isPresentationTour = false;
-    let presentationTimer = null;
+    let audioInitialized = false;
     let soundEnabled = true;
-
     let synth = null;
-    function initSound() {
+
+    function initAudio() {
+      if (audioInitialized) return;
       try {
-        if (!synth && window.Tone) {
-          synth = new Tone.PolySynth(Tone.Synth, {
-            oscillator: { type: 'sine' },
-            envelope: { attack: 0.005, decay: 0.1, sustain: 0.05, release: 0.4 }
-          }).toDestination();
-          synth.volume.value = -12;
-        }
-        if (window.Tone && Tone.context.state !== 'running') {
-          Tone.start();
-        }
+        synth = new Tone.PolySynth(Tone.Synth, {
+          oscillator: { type: "triangle" },
+          envelope: { attack: 0.005, decay: 0.15, sustain: 0.05, release: 0.3 }
+        }).toDestination();
+        synth.volume.value = -12;
+        audioInitialized = true;
       } catch (e) {
-        console.warn('Tone.js audio init issue:', e);
+        console.warn("Audio deferred", e);
       }
     }
 
     function playSound(type) {
       if (!soundEnabled) return;
-      initSound();
-      if (!synth) return;
+      if (!audioInitialized) initAudio();
       try {
-        const now = Tone.now();
-        if (type === 'slide') {
-          synth.triggerAttackRelease(['C5', 'G5'], '16n', now);
-        } else if (type === 'click') {
-          synth.triggerAttackRelease(['E5'], '32n', now);
-        } else if (type === 'success') {
-          synth.triggerAttackRelease(['C5', 'E5', 'G5', 'C6'], '16n', now);
+        if (Tone.context.state !== 'running') {
+          Tone.start();
         }
-      } catch (e) {
-        // Fallback silently
-      }
+        if (type === 'slide') {
+          synth.triggerAttackRelease(["E5", "G#5", "B5"], "16n");
+        } else if (type === 'pin') {
+          synth.triggerAttackRelease(["C6", "E6"], "32n");
+        } else if (type === 'toggle') {
+          synth.triggerAttackRelease(["A5"], "32n");
+        }
+      } catch (e) {}
     }
+  </script>
 
-    let scene, camera, renderer, globeGroup;
-    let earthMesh, atmosphereMesh;
-    let candyRingGroup;
-    let pinObjects = [];
-    let arcLines = [];
-    let isDragging = false;
-    let prevMouseX = 0;
-    let prevMouseY = 0;
-    let targetCameraPos = new THREE.Vector3(0, 20, 180);
-    let targetLookAt = new THREE.Vector3(0, 0, 0);
-
-    function initThreeScene() {
-      const container = document.getElementById('globe-container');
-      const width = window.innerWidth;
-      const height = window.innerHeight;
-
-      scene = new THREE.Scene();
-      camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 1000);
-      camera.position.set(0, 30, 200);
-
-      renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-      renderer.setSize(width, height);
-      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-      container.appendChild(renderer.domElement);
-
-      // Ambient and directional lighting
-      const ambientLight = new THREE.AmbientLight(0xfff5ea, 1.2);
-      scene.add(ambientLight);
-
-      const sunLight = new THREE.DirectionalLight(0xfffaed, 1.8);
-      sunLight.position.set(150, 100, 120);
-      scene.add(sunLight);
-
-      const rimLight = new THREE.DirectionalLight(0xFDB813, 0.9);
-      rimLight.position.set(-120, -50, -100);
-      scene.add(rimLight);
-
-      globeGroup = new THREE.Group();
-      scene.add(globeGroup);
-
-      buildRealisticProceduralEarth();
-      buildAtmosphereGlow();
-      buildOrbitalCandyRing();
-      buildMarketPinsAndTradeArcs();
-
-      window.addEventListener('resize', onWindowResize);
-    }
-
-    function buildRealisticProceduralEarth() {
+  <script>
+    function createProceduralEarthCanvas() {
       const canvas = document.createElement('canvas');
       canvas.width = 2048;
       canvas.height = 1024;
       const ctx = canvas.getContext('2d');
 
-      // Base chocolate brown gradient
-      const grad = ctx.createLinearGradient(0, 0, 0, canvas.height);
-      grad.addColorStop(0, '#2d1408');
-      grad.addColorStop(0.5, '#421d0a');
-      grad.addColorStop(1, '#240f06');
-      ctx.fillStyle = grad;
+      const oceanGrad = ctx.createLinearGradient(0, 0, 0, canvas.height);
+      oceanGrad.addColorStop(0, '#120502');
+      oceanGrad.addColorStop(0.3, '#2a0e05');
+      oceanGrad.addColorStop(0.7, '#1b0903');
+      oceanGrad.addColorStop(1, '#0c0301');
+      ctx.fillStyle = oceanGrad;
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-      // Continents with golden glow border
-      ctx.fillStyle = '#653112';
-      ctx.strokeStyle = '#FDB813';
-      ctx.lineWidth = 3;
-
-      function drawLand(x, y, w, h, angle = 0) {
-        ctx.save();
-        ctx.translate(x, y);
-        ctx.rotate(angle);
-        ctx.beginPath();
-        ctx.ellipse(0, 0, w, h, 0, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.stroke();
-        ctx.restore();
+      function mapCoords(lon, lat) {
+        const x = (lon + 180) * (canvas.width / 360);
+        const y = (90 - lat) * (canvas.height / 180);
+        return { x, y };
       }
 
-      // North America
-      drawLand(450, 320, 180, 130, -0.2);
-      drawLand(380, 240, 120, 80, 0.3);
+      function drawLandPolygon(coords, fillColor = '#482413', strokeColor = '#fdb913', lineWidth = 2) {
+        if (!coords || coords.length === 0) return;
+        ctx.beginPath();
+        const start = mapCoords(coords[0][0], coords[0][1]);
+        ctx.moveTo(start.x, start.y);
+        for (let i = 1; i < coords.length; i++) {
+          const pt = mapCoords(coords[i][0], coords[i][1]);
+          ctx.lineTo(pt.x, pt.y);
+        }
+        ctx.closePath();
+        ctx.fillStyle = fillColor;
+        ctx.fill();
+        ctx.strokeStyle = strokeColor;
+        ctx.lineWidth = lineWidth;
+        ctx.stroke();
+      }
+
+      // North America (USA Headquarters)
+      drawLandPolygon([
+        [-168, 70], [-130, 70], [-95, 75], [-60, 65], [-55, 50],
+        [-65, 44], [-80, 25], [-90, 20], [-105, 20], [-120, 34],
+        [-125, 48], [-165, 60]
+      ], '#5a2e19', '#fdb913', 2.8);
+
+      // Central America & Caribbean
+      drawLandPolygon([
+        [-105, 20], [-90, 20], [-80, 8], [-77, 8], [-83, 10], [-98, 16]
+      ], '#452212', '#96522c', 1.5);
+
       // South America
-      drawLand(620, 680, 110, 190, 0.3);
-      // Europe
-      drawLand(1080, 300, 100, 80, 0.1);
+      drawLandPolygon([
+        [-80, 10], [-60, 8], [-35, -5], [-37, -12], [-48, -28],
+        [-58, -35], [-68, -54], [-75, -50], [-72, -35], [-81, -5]
+      ], '#3e1d10', '#854522', 1.5);
+
+      // Europe & UK
+      drawLandPolygon([
+        [-10, 36], [0, 44], [5, 48], [15, 55], [30, 70], [45, 68],
+        [30, 45], [15, 38], [-5, 36]
+      ], '#522916', '#f58220', 2.0);
+
+      // UK Highlight (#2 Titan)
+      drawLandPolygon([[-5, 50], [1, 52], [0, 58], [-4, 58], [-5, 50]], '#0066b2', '#60a5fa', 3.0);
+      drawLandPolygon([[-10, 52], [-6, 52], [-6, 55], [-10, 54]], '#381c0e', '#7c3e1e', 1.5);
+
       // Africa
-      drawLand(1100, 560, 140, 170, 0.1);
-      // Asia
-      drawLand(1450, 340, 240, 150, 0.05);
-      drawLand(1380, 480, 90, 90, 0);
-      // Australia
-      drawLand(1680, 720, 110, 85, -0.1);
+      drawLandPolygon([
+        [-17, 32], [-5, 36], [12, 38], [32, 32], [50, 12], [42, -5],
+        [35, -20], [28, -34], [18, -34], [12, -18], [9, 5], [-17, 15]
+      ], '#381c0e', '#73391b', 1.5);
 
-      // Lat/Lon golden grid lines
-      ctx.strokeStyle = 'rgba(253, 184, 19, 0.15)';
+      // Asia & Siberia
+      drawLandPolygon([
+        [30, 45], [45, 68], [70, 73], [110, 75], [170, 68], [170, 55],
+        [140, 40], [120, 32], [105, 20], [80, 10], [70, 22], [50, 25],
+        [35, 32]
+      ], '#4d2614', '#e01e26', 2.2);
+
+      // China Highlight (#3 Titan)
+      drawLandPolygon([
+        [75, 38], [95, 42], [120, 40], [122, 30], [118, 22], [105, 21],
+        [100, 26], [85, 28], [75, 38]
+      ], '#801b1b', '#fb7185', 3.0);
+
+      // India subcontinent
+      drawLandPolygon([[70, 22], [88, 22], [80, 8], [74, 15]], '#3a1b0d', '#6e361a', 1.5);
+      // Southeast Asia
+      drawLandPolygon([[98, 20], [108, 15], [105, 8], [98, 5]], '#3a1b0d', '#6e361a', 1.5);
+      // Japan
+      drawLandPolygon([[130, 32], [140, 38], [142, 44], [138, 42], [130, 33]], '#442010', '#8a4623', 1.5);
+      // Australia & NZ
+      drawLandPolygon([
+        [114, -22], [125, -15], [142, -11], [153, -28], [148, -38],
+        [138, -36], [115, -34]
+      ], '#3e1d10', '#854522', 1.5);
+
+      // Golden latitude & longitude grid lines
+      ctx.strokeStyle = 'rgba(253, 185, 19, 0.12)';
       ctx.lineWidth = 1;
-      for (let lat = 100; lat < canvas.height; lat += 100) {
+      for (let lat = -80; lat <= 80; lat += 20) {
+        const y = (90 - lat) * (canvas.height / 180);
         ctx.beginPath();
-        ctx.moveTo(0, lat);
-        ctx.lineTo(canvas.width, lat);
+        ctx.moveTo(0, y);
+        ctx.lineTo(canvas.width, y);
         ctx.stroke();
       }
-      for (let lon = 150; lon < canvas.width; lon += 150) {
+      for (let lon = -180; lon <= 180; lon += 30) {
+        const x = (lon + 180) * (canvas.width / 360);
         ctx.beginPath();
-        ctx.moveTo(lon, 0);
-        ctx.lineTo(lon, canvas.height);
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, canvas.height);
         ctx.stroke();
       }
 
-      // Sparkling city night points
-      ctx.fillStyle = '#FFE082';
-      for (let i = 0; i < 600; i++) {
-        const px = Math.random() * canvas.width;
-        const py = Math.random() * canvas.height;
-        ctx.beginPath();
-        ctx.arc(px, py, Math.random() * 2 + 0.5, 0, Math.PI * 2);
-        ctx.fill();
+      // City light constellations around Top 3
+      function drawCityLights(centerLon, centerLat, count, color) {
+        ctx.fillStyle = color;
+        for (let i = 0; i < count; i++) {
+          const rLon = centerLon + (Math.random() - 0.5) * 25;
+          const rLat = centerLat + (Math.random() - 0.5) * 16;
+          const pt = mapCoords(rLon, rLat);
+          ctx.beginPath();
+          ctx.arc(pt.x, pt.y, Math.random() * 2 + 0.8, 0, Math.PI * 2);
+          ctx.fill();
+        }
       }
+      drawCityLights(-80, 38, 120, 'rgba(253, 185, 19, 0.85)');
+      drawCityLights(0, 52, 60, 'rgba(96, 165, 250, 0.9)');
+      drawCityLights(118, 32, 90, 'rgba(244, 63, 94, 0.9)');
 
-      const earthTexture = new THREE.CanvasTexture(canvas);
-      const earthGeo = new THREE.SphereGeometry(65, 64, 64);
-      const earthMat = new THREE.MeshStandardMaterial({
-        map: earthTexture,
-        roughness: 0.45,
-        metalness: 0.15
-      });
-
-      earthMesh = new THREE.Mesh(earthGeo, earthMat);
-      globeGroup.add(earthMesh);
+      return canvas;
     }
+  </script>
 
-    function buildAtmosphereGlow() {
-      const atmoGeo = new THREE.SphereGeometry(67.5, 32, 32);
-      const atmoMat = new THREE.MeshBasicMaterial({
-        color: 0xFDB813,
-        transparent: true,
-        opacity: 0.12,
-        side: THREE.BackSide
-      });
-      atmosphereMesh = new THREE.Mesh(atmoGeo, atmoMat);
-      globeGroup.add(atmosphereMesh);
-    }
+  <script>
+    const container = document.getElementById('globe-container');
+    let scene, camera, renderer, globeGroup, earthMesh, atmosphereMesh;
+    let candyRingGroup, tradeArcsGroup;
+    let pinObjects = [];
+    let currentSlide = 0;
+    let isAutoRotating = true;
+    let isUserDragging = false;
+    let presentationInterval = null;
+    let isPresentationTourRunning = false;
 
-    function buildOrbitalCandyRing() {
-      candyRingGroup = new THREE.Group();
-      candyRingGroup.rotation.x = Math.PI * 0.28;
-      candyRingGroup.rotation.y = Math.PI * 0.1;
+    const targetCameraPos = new THREE.Vector3(0, 20, 230);
+    const targetLookAt = new THREE.Vector3(0, 0, 0);
+    const currentLookAt = new THREE.Vector3(0, 0, 0);
 
-      const candyColors = [0xE01A22, 0xFDB813, 0x0066B2, 0x009639, 0xF58220, 0x4A2311];
-      const ringRadius = 95;
-      const totalCandies = 36;
+    const GLOBE_RADIUS = 85;
 
-      for (let i = 0; i < totalCandies; i++) {
-        const angle = (i / totalCandies) * Math.PI * 2;
-        const x = Math.cos(angle) * ringRadius;
-        const z = Math.sin(angle) * ringRadius;
-
-        const color = candyColors[i % candyColors.length];
-        const candyGeo = new THREE.CylinderGeometry(2.4, 2.4, 1.2, 18);
-        const candyMat = new THREE.MeshStandardMaterial({
-          color: color,
-          roughness: 0.3,
-          metalness: 0.2
-        });
-        const candy = new THREE.Mesh(candyGeo, candyMat);
-        candy.position.set(x, 0, z);
-        candy.rotation.x = Math.PI * 0.5;
-        candy.rotation.z = angle;
-        candyRingGroup.add(candy);
-      }
-
-      globeGroup.add(candyRingGroup);
-    }
-
-    function buildMarketPinsAndTradeArcs() {
-      const R = 65;
-
-      TOP_MARKETS.forEach((market, idx) => {
-        const phi = (90 - market.lat) * (Math.PI / 180);
-        const theta = (market.lon + 180) * (Math.PI / 180);
-
-        const x = -(R * Math.sin(phi) * Math.cos(theta));
-        const z = R * Math.sin(phi) * Math.sin(theta);
-        const y = R * Math.cos(phi);
-
-        const normal = new THREE.Vector3(x, y, z).normalize();
-        const pinGroup = new THREE.Group();
-        pinGroup.position.set(x, y, z);
-        pinGroup.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), normal);
-
-        // Light beam
-        const beamGeo = new THREE.CylinderGeometry(0.5, 1.2, 16, 16);
-        beamGeo.translate(0, 8, 0);
-        const beamMat = new THREE.MeshBasicMaterial({
-          color: market.podiumColor,
-          transparent: true,
-          opacity: 0.75
-        });
-        const beam = new THREE.Mesh(beamGeo, beamMat);
-        pinGroup.add(beam);
-
-        // Candy head
-        const headGeo = new THREE.CylinderGeometry(3.5, 3.5, 1.6, 20);
-        headGeo.translate(0, 16, 0);
-        const headMat = new THREE.MeshStandardMaterial({
-          color: market.podiumColor,
-          roughness: 0.25,
-          metalness: 0.4
-        });
-        const head = new THREE.Mesh(headGeo, headMat);
-        pinGroup.add(head);
-
-        // Ground pulse ring
-        const ringGeo = new THREE.RingGeometry(2, 4.5, 24);
-        ringGeo.rotateX(-Math.PI / 2);
-        const ringMat = new THREE.MeshBasicMaterial({
-          color: market.podiumColor,
-          transparent: true,
-          opacity: 0.8,
-          side: THREE.DoubleSide
-        });
-        const ring = new THREE.Mesh(ringGeo, ringMat);
-        pinGroup.add(ring);
-
-        pinGroup.userData = { marketIndex: idx, ringMesh: ring, headMesh: head };
-        globeGroup.add(pinGroup);
-        pinObjects.push(pinGroup);
-      });
-
-      // Trade arcs between USA and UK/China
-      const usaPos = getSphereVector(TOP_MARKETS[0].lat, TOP_MARKETS[0].lon, R);
-      const ukPos = getSphereVector(TOP_MARKETS[1].lat, TOP_MARKETS[1].lon, R);
-      const chnPos = getSphereVector(TOP_MARKETS[2].lat, TOP_MARKETS[2].lon, R);
-
-      create3DArc(usaPos, ukPos, 0xFDB813);
-      create3DArc(usaPos, chnPos, 0xF58220);
-    }
-
-    function getSphereVector(lat, lon, radius) {
+    function latLonToVector3(lat, lon, radius) {
       const phi = (90 - lat) * (Math.PI / 180);
       const theta = (lon + 180) * (Math.PI / 180);
       const x = -(radius * Math.sin(phi) * Math.cos(theta));
@@ -680,403 +769,630 @@
       return new THREE.Vector3(x, y, z);
     }
 
-    function create3DArc(v1, v2, colorHex) {
-      const mid = new THREE.Vector3().addVectors(v1, v2).multiplyScalar(0.5);
-      const dist = v1.distanceTo(v2);
-      mid.normalize().multiplyScalar(65 + dist * 0.28);
+    function createCandyLentil(colorHex, radius = 3.2, hasLogo = true) {
+      const group = new THREE.Group();
+      const geo = new THREE.SphereGeometry(radius, 24, 24);
+      geo.scale(1, 0.45, 1);
 
-      const curve = new THREE.QuadraticBezierCurve3(v1, mid, v2);
+      let candyMat;
+      if (hasLogo) {
+        const logoCanvas = document.createElement('canvas');
+        logoCanvas.width = 128;
+        logoCanvas.height = 128;
+        const lctx = logoCanvas.getContext('2d');
+        lctx.fillStyle = '#' + new THREE.Color(colorHex).getHexString();
+        lctx.fillRect(0, 0, 128, 128);
+
+        lctx.fillStyle = '#ffffff';
+        lctx.font = 'bold 74px "Fredoka", sans-serif';
+        lctx.textAlign = 'center';
+        lctx.textBaseline = 'middle';
+        lctx.shadowColor = 'rgba(0,0,0,0.3)';
+        lctx.shadowBlur = 6;
+        lctx.fillText('m', 64, 68);
+
+        const tex = new THREE.CanvasTexture(logoCanvas);
+        candyMat = new THREE.MeshStandardMaterial({
+          map: tex,
+          roughness: 0.25,
+          metalness: 0.35,
+          emissive: colorHex,
+          emissiveIntensity: 0.25
+        });
+      } else {
+        candyMat = new THREE.MeshStandardMaterial({
+          color: colorHex,
+          roughness: 0.25,
+          metalness: 0.4,
+          emissive: colorHex,
+          emissiveIntensity: 0.3
+        });
+      }
+
+      const mesh = new THREE.Mesh(geo, candyMat);
+      group.add(mesh);
+      return group;
+    }
+
+    function createPin(market, index) {
+      const pinGroup = new THREE.Group();
+      const pos = latLonToVector3(market.lat, market.lon, GLOBE_RADIUS);
+      const normal = pos.clone().normalize();
+
+      pinGroup.position.copy(pos);
+
+      const candyHead = createCandyLentil(market.color, 4.0, true);
+      candyHead.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), normal);
+      candyHead.position.copy(normal.clone().multiplyScalar(7.2));
+      pinGroup.add(candyHead);
+
+      const podiumHeight = market.rank === 1 ? 8 : (market.rank === 2 ? 6.5 : 5.5);
+      const stemGeo = new THREE.CylinderGeometry(0.5, 0.8, podiumHeight, 16);
+      const stemMat = new THREE.MeshStandardMaterial({
+        color: market.rank === 1 ? 0xffd700 : (market.rank === 2 ? 0xe2e8f0 : 0xcd7f32),
+        metalness: 0.85,
+        roughness: 0.2
+      });
+      const stemMesh = new THREE.Mesh(stemGeo, stemMat);
+      stemMesh.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), normal);
+      stemMesh.position.copy(normal.clone().multiplyScalar(podiumHeight / 2));
+      pinGroup.add(stemMesh);
+
+      const ringGeo = new THREE.RingGeometry(1.5, 4.2, 32);
+      const ringMat = new THREE.MeshBasicMaterial({
+        color: market.color,
+        side: THREE.DoubleSide,
+        transparent: true,
+        opacity: 0.85
+      });
+      const ringMesh = new THREE.Mesh(ringGeo, ringMat);
+      ringMesh.quaternion.setFromUnitVectors(new THREE.Vector3(0, 0, 1), normal);
+      ringMesh.position.copy(normal.clone().multiplyScalar(0.3));
+      pinGroup.add(ringMesh);
+
+      const beamGeo = new THREE.CylinderGeometry(0.2, 0.9, 32, 12);
+      const beamMat = new THREE.MeshBasicMaterial({
+        color: market.color,
+        transparent: true,
+        opacity: 0.5,
+        blending: THREE.AdditiveBlending
+      });
+      const beamMesh = new THREE.Mesh(beamGeo, beamMat);
+      beamMesh.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), normal);
+      beamMesh.position.copy(normal.clone().multiplyScalar(17));
+      pinGroup.add(beamMesh);
+
+      pinGroup.userData = {
+        marketIndex: index,
+        marketId: market.id,
+        candyHead: candyHead,
+        ringMesh: ringMesh,
+        beamMesh: beamMesh,
+        stemMesh: stemMesh
+      };
+
+      return pinGroup;
+    }
+
+    function createOrbitingCandyRing() {
+      const ringGroup = new THREE.Group();
+      const ringRadius = GLOBE_RADIUS * 1.52;
+      const candyPalette = [0xE01E26, 0xFDB913, 0x0066B2, 0x009639, 0xF58220, 0x4A2311];
+      const candyCount = 38;
+
+      const pathGeo = new THREE.RingGeometry(ringRadius - 0.4, ringRadius + 0.4, 80);
+      const pathMat = new THREE.MeshBasicMaterial({
+        color: 0xfdb913,
+        side: THREE.DoubleSide,
+        transparent: true,
+        opacity: 0.25,
+        blending: THREE.AdditiveBlending
+      });
+      const pathMesh = new THREE.Mesh(pathGeo, pathMat);
+      pathMesh.rotation.x = Math.PI / 2;
+      ringGroup.add(pathMesh);
+
+      for (let i = 0; i < candyCount; i++) {
+        const angle = (i / candyCount) * Math.PI * 2;
+        const color = candyPalette[i % candyPalette.length];
+        const candy = createCandyLentil(color, 2.2 + (i % 2) * 0.8, true);
+
+        candy.position.set(
+          Math.cos(angle) * ringRadius,
+          (Math.sin(angle * 3)) * 4.5,
+          Math.sin(angle) * ringRadius
+        );
+        candy.rotation.x = Math.random() * Math.PI;
+        candy.rotation.y = Math.random() * Math.PI;
+        ringGroup.add(candy);
+      }
+
+      ringGroup.rotation.z = THREE.MathUtils.degToRad(23.5);
+      ringGroup.rotation.x = THREE.MathUtils.degToRad(12);
+
+      return ringGroup;
+    }
+
+    function createTradeArc(startMarket, endMarket, colorHex) {
+      const p1 = latLonToVector3(startMarket.lat, startMarket.lon, GLOBE_RADIUS);
+      const p2 = latLonToVector3(endMarket.lat, endMarket.lon, GLOBE_RADIUS);
+
+      const mid = p1.clone().add(p2).multiplyScalar(0.5);
+      const distance = p1.distanceTo(p2);
+      const altitude = GLOBE_RADIUS + distance * 0.38;
+      mid.normalize().multiplyScalar(altitude);
+
+      const curve = new THREE.QuadraticBezierCurve3(p1, mid, p2);
       const points = curve.getPoints(50);
-      const geometry = new THREE.BufferGeometry().setFromPoints(points);
-      const material = new THREE.LineBasicMaterial({
+      const arcGeo = new THREE.BufferGeometry().setFromPoints(points);
+
+      const arcMat = new THREE.LineBasicMaterial({
         color: colorHex,
         transparent: true,
-        opacity: 0.75,
+        opacity: 0.7,
+        blending: THREE.AdditiveBlending,
         linewidth: 2
       });
-      const arc = new THREE.Line(geometry, material);
-      globeGroup.add(arc);
-      arcLines.push(arc);
+
+      return new THREE.Line(arcGeo, arcMat);
     }
 
-    let fallingAnimId = null;
-    let candies = [];
+    function initThreeScene() {
+      scene = new THREE.Scene();
 
-    function initFallingCandiesCanvas() {
-      const canvas = document.getElementById('falling-candies-canvas');
-      const ctx = canvas.getContext('2d');
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
+      camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 2000);
+      camera.position.set(0, 30, 230);
 
-      const colors = ['#E01A22', '#FDB813', '#0066B2', '#009639', '#F58220', '#4A2311'];
-      candies = [];
-      for (let i = 0; i < 45; i++) {
-        candies.push({
-          x: Math.random() * canvas.width,
-          y: Math.random() * canvas.height,
-          radius: Math.random() * 14 + 12,
-          color: colors[Math.floor(Math.random() * colors.length)],
-          speedY: Math.random() * 1.5 + 0.8,
-          speedX: Math.sin(Math.random() * Math.PI) * 0.6,
-          rotation: Math.random() * Math.PI * 2,
-          rotationSpeed: (Math.random() - 0.5) * 0.04
-        });
-      }
-    }
+      renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      container.appendChild(renderer.domElement);
 
-    function renderFallingCandies() {
-      const canvas = document.getElementById('falling-candies-canvas');
-      const ctx = canvas.getContext('2d');
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      const ambientLight = new THREE.AmbientLight(0xffeedb, 1.1);
+      scene.add(ambientLight);
 
-      candies.forEach(c => {
-        c.y += c.speedY;
-        c.x += c.speedX;
-        c.rotation += c.rotationSpeed;
+      const sunLight = new THREE.DirectionalLight(0xfff6dd, 2.0);
+      sunLight.position.set(220, 150, 180);
+      scene.add(sunLight);
 
-        if (c.y > canvas.height + 40) {
-          c.y = -30;
-          c.x = Math.random() * canvas.width;
-        }
+      const backColorRim = new THREE.DirectionalLight(0xf58220, 1.5);
+      backColorRim.position.set(-200, -100, -160);
+      scene.add(backColorRim);
 
-        ctx.save();
-        ctx.translate(c.x, c.y);
-        ctx.rotate(c.rotation);
+      globeGroup = new THREE.Group();
+      scene.add(globeGroup);
 
-        // Candy body
-        ctx.beginPath();
-        ctx.ellipse(0, 0, c.radius, c.radius * 0.85, 0, 0, Math.PI * 2);
-        ctx.fillStyle = c.color;
-        ctx.shadowColor = 'rgba(0,0,0,0.4)';
-        ctx.shadowBlur = 8;
-        ctx.fill();
+      const earthCanvas = createProceduralEarthCanvas();
+      const earthTexture = new THREE.CanvasTexture(earthCanvas);
+      earthTexture.generateMipmaps = true;
 
-        // White 'm' logo
-        ctx.fillStyle = 'rgba(255,255,255,0.9)';
-        ctx.font = `bold ${Math.floor(c.radius * 0.8)}px "Paytone One", cursive`;
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.fillText('m', 0, 1);
+      const globeGeo = new THREE.SphereGeometry(GLOBE_RADIUS, 64, 64);
+      const globeMat = new THREE.MeshStandardMaterial({
+        map: earthTexture,
+        roughness: 0.5,
+        metalness: 0.25,
+        bumpScale: 0.08
+      });
+      earthMesh = new THREE.Mesh(globeGeo, globeMat);
+      globeGroup.add(earthMesh);
 
-        ctx.restore();
+      const atmoGeo = new THREE.SphereGeometry(GLOBE_RADIUS * 1.09, 48, 48);
+      const atmoMat = new THREE.ShaderMaterial({
+        vertexShader: `
+          varying vec3 vNormal;
+          void main() {
+            vNormal = normalize(normalMatrix * normal);
+            gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+          }
+        `,
+        fragmentShader: `
+          varying vec3 vNormal;
+          void main() {
+            float intensity = pow(0.72 - dot(vNormal, vec3(0, 0, 1.0)), 2.0);
+            gl_FragColor = vec4(0.99, 0.73, 0.12, 1.0) * intensity * 0.8;
+          }
+        `,
+        blending: THREE.AdditiveBlending,
+        side: THREE.BackSide,
+        transparent: true
+      });
+      atmosphereMesh = new THREE.Mesh(atmoGeo, atmoMat);
+      scene.add(atmosphereMesh);
+
+      candyRingGroup = createOrbitingCandyRing();
+      globeGroup.add(candyRingGroup);
+
+      tradeArcsGroup = new THREE.Group();
+      const arcToUK = createTradeArc(MM_MARKETS[0], MM_MARKETS[1], 0x60a5fa);
+      const arcToChina = createTradeArc(MM_MARKETS[0], MM_MARKETS[2], 0xf43f5e);
+      tradeArcsGroup.add(arcToUK);
+      tradeArcsGroup.add(arcToChina);
+      globeGroup.add(tradeArcsGroup);
+
+      MM_MARKETS.forEach((market, idx) => {
+        const pin = createPin(market, idx);
+        pinObjects.push(pin);
+        globeGroup.add(pin);
       });
 
-      fallingAnimId = requestAnimationFrame(renderFallingCandies);
-    }
-
-    function startFallingCandies() {
-      if (!fallingAnimId) {
-        initFallingCandiesCanvas();
-        renderFallingCandies();
+      const starGeo = new THREE.BufferGeometry();
+      const starCount = 450;
+      const starCoords = new Float32Array(starCount * 3);
+      for (let i = 0; i < starCount * 3; i += 3) {
+        starCoords[i] = (Math.random() - 0.5) * 850;
+        starCoords[i + 1] = (Math.random() - 0.5) * 850;
+        starCoords[i + 2] = (Math.random() - 0.5) * 850;
       }
+      starGeo.setAttribute('position', new THREE.BufferAttribute(starCoords, 3));
+      const starMat = new THREE.PointsMaterial({
+        color: 0xfdb913,
+        size: 2.2,
+        transparent: true,
+        opacity: 0.4
+      });
+      scene.add(new THREE.Points(starGeo, starMat));
     }
 
-    function stopFallingCandies() {
-      if (fallingAnimId) {
-        cancelAnimationFrame(fallingAnimId);
-        fallingAnimId = null;
-      }
-    }
+    function focusOnMarket(index, triggerAudio = true) {
+      const TOTAL_SLIDES = 4;
+      if (index < 0 || index >= TOTAL_SLIDES) return;
+      currentSlide = index;
 
-    function goToSlide(index, triggerAudio = true) {
-      if (index < 0) index = TOTAL_SLIDES - 1;
-      if (index >= TOTAL_SLIDES) index = 0;
-      currentSlideIndex = index;
-
+      const channelsSlide = document.getElementById('channels-slide');
       const globeContainer = document.getElementById('globe-container');
       const slideCard = document.getElementById('slide-card');
-      const channelsContainer = document.getElementById('slide-channels-container');
-      const fallingCanvas = document.getElementById('falling-candies-canvas');
 
       if (index === 3) {
-        // Slide 4: Distribution Channels
-        globeContainer.classList.add('opacity-15');
+        channelsSlide.classList.remove('opacity-0', 'pointer-events-none');
+        channelsSlide.classList.add('opacity-100', 'pointer-events-auto');
+
+        globeContainer.classList.add('opacity-15', 'pointer-events-none');
         slideCard.classList.add('opacity-0', 'pointer-events-none');
-        channelsContainer.classList.remove('opacity-0', 'pointer-events-none');
-        channelsContainer.classList.add('opacity-100', 'pointer-events-auto');
-        fallingCanvas.classList.remove('opacity-0');
-        fallingCanvas.classList.add('opacity-100');
+
         startFallingCandies();
-      } else {
-        // Slides 0, 1, 2: 3D Globe Markets
-        channelsContainer.classList.add('opacity-0', 'pointer-events-none');
-        channelsContainer.classList.remove('opacity-100', 'pointer-events-auto');
-        fallingCanvas.classList.add('opacity-0');
-        fallingCanvas.classList.remove('opacity-100');
-        stopFallingCandies();
-
-        globeContainer.classList.remove('opacity-15');
-        slideCard.classList.remove('opacity-0', 'pointer-events-none');
-
-        const m = TOP_MARKETS[index];
-        // Rotate globe towards selected market coordinates
-        const phi = (90 - m.lat) * (Math.PI / 180);
-        const theta = (m.lon + 180) * (Math.PI / 180);
-
-        const dist = 180;
-        const camX = -(dist * Math.sin(phi) * Math.cos(theta));
-        const camZ = dist * Math.sin(phi) * Math.sin(theta);
-        const camY = dist * Math.cos(phi) + 10;
-
-        targetCameraPos.set(camX, camY, camZ);
-        targetLookAt.set(0, 0, 0);
-
-        // Highlight pin in 3D
-        pinObjects.forEach((p, pIdx) => {
-          const isSelected = pIdx === index;
-          p.userData.headMesh.scale.set(isSelected ? 1.4 : 1, isSelected ? 1.4 : 1, isSelected ? 1.4 : 1);
-          p.userData.ringMesh.material.opacity = isSelected ? 1.0 : 0.4;
-        });
-
-        updateSlideCardContent(m);
+        renderSlideDots(3);
+        renderChannelsDots(3);
+        if (triggerAudio) playSound('slide');
+        return;
       }
 
-      renderSlideDots();
+      channelsSlide.classList.remove('opacity-100', 'pointer-events-auto');
+      channelsSlide.classList.add('opacity-0', 'pointer-events-none');
+      stopFallingCandies();
+
+      globeContainer.classList.remove('opacity-15', 'pointer-events-none');
+      slideCard.classList.remove('opacity-0', 'pointer-events-none');
+
+      const market = MM_MARKETS[index];
+
+      const phi = (90 - market.lat) * (Math.PI / 180);
+      const theta = (market.lon + 180) * (Math.PI / 180);
+
+      const dist = 180;
+      const camX = -(dist * Math.sin(phi) * Math.cos(theta));
+      const camZ = dist * Math.sin(phi) * Math.sin(theta);
+      const camY = dist * Math.cos(phi) + 14;
+
+      targetCameraPos.set(camX, camY, camZ);
+      targetLookAt.set(0, 0, 0);
+
+      pinObjects.forEach((pin, pIdx) => {
+        const isSelected = pIdx === index;
+        const ring = pin.userData.ringMesh;
+        const candy = pin.userData.candyHead;
+        const beam = pin.userData.beamMesh;
+
+        if (isSelected) {
+          candy.scale.set(1.4, 1.4, 1.4);
+          ring.material.opacity = 1.0;
+          beam.material.opacity = 0.9;
+        } else {
+          candy.scale.set(1.0, 1.0, 1.0);
+          ring.material.opacity = 0.4;
+          beam.material.opacity = 0.25;
+        }
+      });
+
+      updateSlideContent(market, index);
       if (triggerAudio) playSound('slide');
     }
 
-    function updateSlideCardContent(m) {
-      document.getElementById('slide-rank-badge').innerHTML = `<span>${m.rank}</span>`;
-      document.getElementById('slide-country-code').textContent = m.code;
-      document.getElementById('slide-country-name').textContent = m.name;
-      document.getElementById('slide-subtitle').textContent = m.subtitle;
-      document.getElementById('slide-description').textContent = m.description;
-      document.getElementById('slide-stat-revenue').textContent = m.revenue;
-      document.getElementById('slide-stat-growth').textContent = m.growth;
-      document.getElementById('slide-stat-share').textContent = m.share;
-      document.getElementById('slide-stat-rank').textContent = m.rankDesc;
-      document.getElementById('slide-flavor').textContent = m.flavor;
-      document.getElementById('slide-channels').textContent = m.channels;
-      document.getElementById('slide-strategy').textContent = m.strategy;
+    function updateSlideContent(m, index) {
+      const card = document.getElementById('slide-card');
+      card.classList.remove('translate-y-0', 'opacity-100');
+      card.classList.add('translate-y-4', 'opacity-0');
+
+      setTimeout(() => {
+        document.getElementById('slide-rank-medal').textContent = m.medal;
+        document.getElementById('slide-rank-title').textContent = `#${m.rank} ${m.tier}`;
+        document.getElementById('slide-rank-badge').className = `px-3 py-1 rounded-full text-xs font-black shadow-md flex items-center space-x-1.5 ${m.badgeColor}`;
+        document.getElementById('slide-code').textContent = m.code;
+        document.getElementById('slide-country').textContent = `${m.country} (${m.countryEn})`;
+        document.getElementById('slide-city').textContent = m.city;
+        document.getElementById('slide-description').textContent = m.description;
+        document.getElementById('slide-revenue').textContent = m.revenue;
+        document.getElementById('slide-growth').textContent = `${m.growth} so với năm trước`;
+        document.getElementById('slide-share').textContent = m.marketShare;
+        document.getElementById('slide-rank-text').textContent = m.rankText;
+        document.getElementById('slide-top-flavor').innerHTML = `
+          <span class="w-2.5 h-2.5 rounded-full inline-block mr-1.5 shadow" style="background-color: ${m.flavorColor}"></span>
+          ${m.topFlavor}
+        `;
+        document.getElementById('slide-channel').textContent = m.channel;
+        document.getElementById('slide-highlight').textContent = m.highlight;
+
+        renderSlideDots(index);
+
+        card.classList.remove('translate-y-4', 'opacity-0');
+        card.classList.add('translate-y-0', 'opacity-100');
+      }, 180);
     }
 
-    function renderSlideDots() {
-      const dotsCont1 = document.getElementById('slide-dots');
-      const dotsCont2 = document.getElementById('channels-slide-dots');
+    function renderSlideDots(activeIndex) {
+      const container = document.getElementById('slide-dots');
+      container.innerHTML = '';
+      const dotLabels = ['#1', '#2', '#3', '📊'];
+      const dotTitles = ['Hoa Kỳ (Top 1)', 'Vương Quốc Anh (Top 2)', 'Trung Quốc (Top 3)', 'Kênh Phân Phối Toàn Cầu'];
 
-      [dotsCont1, dotsCont2].forEach(container => {
-        if (!container) return;
-        container.innerHTML = '';
-        const dotColors = ['#FDB813', '#E01A22', '#0066B2', '#009639'];
-        for (let i = 0; i < TOTAL_SLIDES; i++) {
-          const btn = document.createElement('button');
-          btn.className = `w-3 h-3 rounded-full candy-dot border border-white/40 ${i === currentSlideIndex ? 'active scale-125' : 'opacity-50 hover:opacity-100'}`;
-          btn.style.backgroundColor = dotColors[i];
-          btn.title = `Slide ${i + 1}`;
-          btn.onclick = (e) => {
-            e.stopPropagation();
-            goToSlide(i);
-          };
-          container.appendChild(btn);
-        }
-      });
-    }
-
-    function exportToPowerPoint() {
-      try {
-        if (typeof PptxGenJS === 'undefined') {
-          console.error('PptxGenJS library is loading, please try again in a second.');
-          return;
-        }
-
-        const pptx = new PptxGenJS();
-        pptx.layout = 'LAYOUT_16x9';
-
-        // Slide 1: USA
-        const s1 = pptx.addSlide();
-        s1.background = { color: '240F06' };
-        s1.addText("M&M's GLOBAL SALES REPORT", { x: 0.8, y: 0.6, fontSize: 13, bold: true, color: 'FDB813', fontFace: 'Arial' });
-        s1.addText("Hoa Kỳ (United States)", { x: 0.8, y: 1.1, fontSize: 28, bold: true, color: 'FFFFFF', fontFace: 'Arial' });
-        s1.addText("🏆 #1 VÔ ĐỊCH TOÀN CẦU • Newark (Mars HQ)", { x: 0.8, y: 1.7, fontSize: 13, bold: true, color: 'FDB813' });
-        s1.addText("Hoa Kỳ là thánh địa khai sinh thương hiệu năm 1941 và là thị trường tiêu thụ số 1 không thể lay chuyển, đóng góp hơn 45% tổng sản lượng tiêu thụ M&M's toàn cầu.", { x: 0.8, y: 2.2, w: 8.5, fontSize: 13, color: 'D5D5D5' });
-        s1.addShape(pptx.ShapeType.rect, { x: 0.8, y: 3.3, w: 4.0, h: 2.0, fill: { color: '180B04' }, line: { color: 'FDB813', width: 1 } });
-        s1.addText("DOANH THU ƯỚC TÍNH\n$2.55 Tỷ USD\n↗ +5.9% YoY", { x: 1.0, y: 3.6, fontSize: 15, bold: true, color: 'FDB813' });
-        s1.addShape(pptx.ShapeType.rect, { x: 5.2, y: 3.3, w: 4.0, h: 2.0, fill: { color: '180B04' }, line: { color: 'E01A22', width: 1 } });
-        s1.addText("THỊ PHẦN PHÂN KHÚC\n38.5%\n#1 Tuyệt đối mọi bang tại Mỹ", { x: 5.4, y: 3.6, fontSize: 15, bold: true, color: 'E01A22' });
-
-        // Slide 2: UK
-        const s2 = pptx.addSlide();
-        s2.background = { color: '240F06' };
-        s2.addText("M&M's GLOBAL SALES REPORT", { x: 0.8, y: 0.6, fontSize: 13, bold: true, color: 'FDB813', fontFace: 'Arial' });
-        s2.addText("Vương Quốc Anh (United Kingdom)", { x: 0.8, y: 1.1, fontSize: 28, bold: true, color: 'FFFFFF', fontFace: 'Arial' });
-        s2.addText("🥈 #2 THỊ TRƯỜNG CHÂU ÂU • Slough Factory & London Flagship", { x: 0.8, y: 1.7, fontSize: 13, bold: true, color: 'E0E0E0' });
-        s2.addText("Vương quốc Anh là thị trường châu Âu có mức tiêu thụ bình quân đầu người cao nhất. Cửa hàng M&M's World tại Quảng trường Leicester là biểu tượng bán lẻ lớn nhất London.", { x: 0.8, y: 2.2, w: 8.5, fontSize: 13, color: 'D5D5D5' });
-        s2.addShape(pptx.ShapeType.rect, { x: 0.8, y: 3.3, w: 4.0, h: 2.0, fill: { color: '180B04' }, line: { color: 'E0E0E0', width: 1 } });
-        s2.addText("DOANH THU ƯỚC TÍNH\n$445 Triệu USD\n↗ +4.6% YoY", { x: 1.0, y: 3.6, fontSize: 15, bold: true, color: 'E0E0E0' });
-        s2.addShape(pptx.ShapeType.rect, { x: 5.2, y: 3.3, w: 4.0, h: 2.0, fill: { color: '180B04' }, line: { color: '0066B2', width: 1 } });
-        s2.addText("THỊ PHẦN PHÂN KHÚC\n24.8%\n#1 Dòng kẹo Crispy & Pouch Bags", { x: 5.4, y: 3.6, fontSize: 15, bold: true, color: '0066B2' });
-
-        // Slide 3: China
-        const s3 = pptx.addSlide();
-        s3.background = { color: '240F06' };
-        s3.addText("M&M's GLOBAL SALES REPORT", { x: 0.8, y: 0.6, fontSize: 13, bold: true, color: 'FDB813', fontFace: 'Arial' });
-        s3.addText("Trung Quốc (China)", { x: 0.8, y: 1.1, fontSize: 28, bold: true, color: 'FFFFFF', fontFace: 'Arial' });
-        s3.addText("🥉 #3 TĂNG TRƯỞNG CHÂU Á • Nhà máy Gia Hưng & Thượng Hải Flagship", { x: 0.8, y: 1.7, fontSize: 13, bold: true, color: 'CD7F32' });
-        s3.addText("Trung Quốc là động cơ tăng trưởng nhanh nhất của M&M's toàn cầu với mức tăng trưởng phi mã +12.1% YoY nhờ thương mại điện tử và quà tặng Tết.", { x: 0.8, y: 2.2, w: 8.5, fontSize: 13, color: 'D5D5D5' });
-        s3.addShape(pptx.ShapeType.rect, { x: 0.8, y: 3.3, w: 4.0, h: 2.0, fill: { color: '180B04' }, line: { color: 'CD7F32', width: 1 } });
-        s3.addText("DOANH THU ƯỚC TÍNH\n$410 Triệu USD\n🚀 +12.1% YoY", { x: 1.0, y: 3.6, fontSize: 15, bold: true, color: 'CD7F32' });
-        s3.addShape(pptx.ShapeType.rect, { x: 5.2, y: 3.3, w: 4.0, h: 2.0, fill: { color: '180B04' }, line: { color: 'F58220', width: 1 } });
-        s3.addText("THỊ PHẦN PHÂN KHÚC\n19.2%\nTop 3 Thương hiệu quốc tế", { x: 5.4, y: 3.6, fontSize: 15, bold: true, color: 'F58220' });
-
-        // Slide 4: Channels Matrix
-        const s4 = pptx.addSlide();
-        s4.background = { color: '240F06' };
-        s4.addText("HỆ THỐNG KÊNH PHÂN PHỐI TOÀN CẦU M&M's", { x: 0.8, y: 0.6, fontSize: 24, bold: true, color: 'FDB813' });
-        s4.addText("Tổng doanh thu toàn hệ thống: ~$3.48 Tỷ USD • +1.8 Triệu điểm bán lẻ (POS)", { x: 0.8, y: 1.3, fontSize: 13, color: 'E0E0E0' });
-        
-        const channelData = [
-          "1. Siêu thị & Đại siêu thị (Supermarkets / Hypermarkets): 42% ($1.43 Tỷ USD) - Walmart, Carrefour, Costco",
-          "2. Cửa hàng tiện lợi & Trạm xăng (C-Stores): 24% ($815 Triệu USD) - 7-Eleven, Circle K",
-          "3. Thương mại điện tử & D2C: 16% ($545 Triệu USD | +22.5% YoY) - Amazon, Tmall, M&Ms.com",
-          "4. M&M's World & Travel Retail: 10% ($340 Triệu USD) - London, NY, Shanghai Flagship Stores",
-          "5. Rạp chiếu phim & Vending: 8% ($275 Triệu USD) - AMC Theatres, Sân bay & Trường học"
-        ];
-        channelData.forEach((ch, idx) => {
-          s4.addShape(pptx.ShapeType.rect, { x: 0.8, y: 1.9 + (idx * 0.95), w: 11.5, h: 0.8, fill: { color: '1A0C05' }, line: { color: 'FDB813', width: 0.5 } });
-          s4.addText(ch, { x: 1.0, y: 2.1 + (idx * 0.95), fontSize: 12, bold: true, color: 'FFFFFF' });
+      for (let idx = 0; idx < 4; idx++) {
+        const dot = document.createElement('button');
+        dot.className = `h-3 rounded-full transition-all duration-300 flex items-center justify-center font-bold text-[10px] ${idx === activeIndex ? 'w-8 bg-mm-yellow text-stone-900 shadow-md' : 'w-3 bg-white/25 hover:bg-white/50 text-transparent'}`;
+        dot.textContent = dotLabels[idx];
+        dot.title = dotTitles[idx];
+        dot.addEventListener('click', () => {
+          isAutoRotating = false;
+          updateAutoRotateButtonState();
+          focusOnMarket(idx);
         });
-
-        pptx.writeFile({ fileName: "Bao_Cao_Doanh_Thu_MMs_Toan_Cau.pptx" });
-        playSound('success');
-      } catch (err) {
-        console.error('Lỗi khi xuất file PPTX:', err);
+        container.appendChild(dot);
       }
     }
 
-    function setupEventListeners() {
-      // Prev/Next buttons
-      document.getElementById('btn-prev').addEventListener('click', () => goToSlide(currentSlideIndex - 1));
-      document.getElementById('btn-next').addEventListener('click', () => goToSlide(currentSlideIndex + 1));
-      document.getElementById('btn-channels-prev').addEventListener('click', () => goToSlide(currentSlideIndex - 1));
-      document.getElementById('btn-channels-next').addEventListener('click', () => goToSlide(currentSlideIndex + 1));
+    function renderChannelsDots(activeIndex) {
+      const container = document.getElementById('channels-dots');
+      if (!container) return;
+      container.innerHTML = '';
+      const dotLabels = ['#1', '#2', '#3', '📊 Phân Phối'];
 
-      // Side screen zones
-      document.getElementById('nav-side-prev').addEventListener('click', () => goToSlide(currentSlideIndex - 1));
-      document.getElementById('nav-side-next').addEventListener('click', () => goToSlide(currentSlideIndex + 1));
+      for (let idx = 0; idx < 4; idx++) {
+        const dot = document.createElement('button');
+        dot.className = `px-2.5 py-1 rounded-full transition-all duration-300 flex items-center justify-center font-bold text-[11px] ${idx === activeIndex ? 'bg-mm-yellow text-stone-950 shadow-md ring-2 ring-amber-300' : 'bg-white/10 hover:bg-white/20 text-amber-200'}`;
+        dot.textContent = dotLabels[idx];
+        dot.addEventListener('click', () => {
+          isAutoRotating = false;
+          updateAutoRotateButtonState();
+          focusOnMarket(idx);
+        });
+        container.appendChild(dot);
+      }
+    }
 
-      // Keyboard navigation (Arrow Left/Right, Space, PageUp/Down)
-      window.addEventListener('keydown', (e) => {
-        if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') {
-          goToSlide(currentSlideIndex + 1);
-        } else if (e.key === 'ArrowLeft' || e.key === 'PageUp') {
-          goToSlide(currentSlideIndex - 1);
-        }
+    let previousMousePosition = { x: 0, y: 0 };
+    const raycaster = new THREE.Raycaster();
+    const mouse = new THREE.Vector2();
+
+    function setupInteractionListeners() {
+      const dom = renderer.domElement;
+
+      dom.addEventListener('mousedown', (e) => {
+        isUserDragging = true;
+        isAutoRotating = false;
+        updateAutoRotateButtonState();
+        previousMousePosition = { x: e.clientX, y: e.clientY };
       });
 
-      // Swipe navigation for mobile/touch
-      let touchStartX = 0;
-      window.addEventListener('touchstart', (e) => {
-        touchStartX = e.touches[0].clientX;
-      }, { passive: true });
-      window.addEventListener('touchend', (e) => {
-        const touchEndX = e.changedTouches[0].clientX;
-        const diffX = touchEndX - touchStartX;
-        if (Math.abs(diffX) > 60) {
-          if (diffX < 0) goToSlide(currentSlideIndex + 1);
-          else goToSlide(currentSlideIndex - 1);
-        }
-      }, { passive: true });
-
-      // Auto-rotation button
-      const rotateBtn = document.getElementById('btn-auto-rotate');
-      const rotateLabel = document.getElementById('rotate-label');
-      rotateBtn.addEventListener('click', () => {
-        isAutoRotating = !isAutoRotating;
-        rotateLabel.textContent = `Xoay tự động: ${isAutoRotating ? 'Bật' : 'Tắt'}`;
-        playSound('click');
-      });
-
-      // Slide Tour Presentation Mode
-      const tourBtn = document.getElementById('btn-presentation-mode');
-      tourBtn.addEventListener('click', () => {
-        isPresentationTour = !isPresentationTour;
-        if (isPresentationTour) {
-          tourBtn.classList.add('ring-2', 'ring-amber-300');
-          tourBtn.querySelector('span').textContent = 'Dừng Tour';
-          presentationTimer = setInterval(() => {
-            goToSlide(currentSlideIndex + 1);
-          }, 6500);
-        } else {
-          tourBtn.classList.remove('ring-2', 'ring-amber-300');
-          tourBtn.querySelector('span').textContent = 'Chế độ Slide Tour';
-          clearInterval(presentationTimer);
-        }
-        playSound('click');
-      });
-
-      // Sound mute toggle
-      const soundBtn = document.getElementById('btn-sound');
-      const iconOn = document.getElementById('sound-icon-on');
-      const iconOff = document.getElementById('sound-icon-off');
-      soundBtn.addEventListener('click', () => {
-        soundEnabled = !soundEnabled;
-        iconOn.classList.toggle('hidden', !soundEnabled);
-        iconOff.classList.toggle('hidden', soundEnabled);
-        if (soundEnabled) playSound('click');
-      });
-
-      // Export PPTX button
-      document.getElementById('btn-export-pptx').addEventListener('click', () => {
-        exportToPowerPoint();
-      });
-
-      // Mouse drag controls for 3D Globe
-      const container = document.getElementById('globe-container');
-      container.addEventListener('mousedown', (e) => {
-        isDragging = true;
-        prevMouseX = e.clientX;
-        prevMouseY = e.clientY;
-      });
       window.addEventListener('mouseup', () => {
-        isDragging = false;
+        isUserDragging = false;
       });
-      window.addEventListener('mousemove', (e) => {
-        if (!isDragging || currentSlideIndex === 3) return;
-        const deltaX = e.clientX - prevMouseX;
-        const deltaY = e.clientY - prevMouseY;
-        globeGroup.rotation.y += deltaX * 0.005;
-        globeGroup.rotation.x += deltaY * 0.005;
-        prevMouseX = e.clientX;
-        prevMouseY = e.clientY;
+
+      dom.addEventListener('mousemove', (e) => {
+        if (isUserDragging) {
+          const deltaX = e.clientX - previousMousePosition.x;
+          const deltaY = e.clientY - previousMousePosition.y;
+
+          globeGroup.rotation.y += deltaX * 0.005;
+          globeGroup.rotation.x += deltaY * 0.005;
+          globeGroup.rotation.x = Math.max(-Math.PI / 4, Math.min(Math.PI / 4, globeGroup.rotation.x));
+          previousMousePosition = { x: e.clientX, y: e.clientY };
+        }
       });
+
+      dom.addEventListener('touchstart', (e) => {
+        if (e.touches.length === 1) {
+          isUserDragging = true;
+          isAutoRotating = false;
+          updateAutoRotateButtonState();
+          previousMousePosition = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+        }
+      }, { passive: true });
+
+      dom.addEventListener('touchmove', (e) => {
+        if (isUserDragging && e.touches.length === 1) {
+          const deltaX = e.touches[0].clientX - previousMousePosition.x;
+          const deltaY = e.touches[0].clientY - previousMousePosition.y;
+
+          globeGroup.rotation.y += deltaX * 0.006;
+          globeGroup.rotation.x += deltaY * 0.006;
+          globeGroup.rotation.x = Math.max(-Math.PI / 4, Math.min(Math.PI / 4, globeGroup.rotation.x));
+
+          previousMousePosition = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+        }
+      }, { passive: true });
+
+      dom.addEventListener('touchend', () => {
+        isUserDragging = false;
+      });
+
+      window.addEventListener('wheel', (e) => {
+        const newDist = targetCameraPos.length() + e.deltaY * 0.15;
+        if (newDist >= 130 && newDist <= 320) {
+          targetCameraPos.setLength(newDist);
+        }
+      }, { passive: true });
+
+      dom.addEventListener('click', (e) => {
+        const rect = dom.getBoundingClientRect();
+        mouse.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+        mouse.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+
+        raycaster.setFromCamera(mouse, camera);
+        const clickable = [];
+        pinObjects.forEach(group => {
+          clickable.push(group.userData.candyHead);
+          clickable.push(group.userData.beamMesh);
+        });
+
+        const intersects = raycaster.intersectObjects(clickable, true);
+        if (intersects.length > 0) {
+          let cur = intersects[0].object;
+          while (cur && (!cur.userData || cur.userData.marketIndex === undefined)) {
+            cur = cur.parent;
+          }
+          if (cur && cur.userData.marketIndex !== undefined) {
+            isAutoRotating = false;
+            updateAutoRotateButtonState();
+            focusOnMarket(cur.userData.marketIndex);
+            playSound('pin');
+          }
+        }
+      });
+
+      window.addEventListener('resize', onWindowResize);
     }
 
     function onWindowResize() {
-      if (!camera || !renderer) return;
       camera.aspect = window.innerWidth / window.innerHeight;
       camera.updateProjectionMatrix();
       renderer.setSize(window.innerWidth, window.innerHeight);
-
-      const canvas = document.getElementById('falling-candies-canvas');
-      if (canvas) {
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
-      }
     }
+
+    function setupToolbarButtons() {
+      const TOTAL_SLIDES = 4;
+
+      function goToPrevSlide() {
+        isAutoRotating = false;
+        updateAutoRotateButtonState();
+        let prev = currentSlide - 1;
+        if (prev < 0) prev = TOTAL_SLIDES - 1;
+        focusOnMarket(prev);
+      }
+
+      function goToNextSlide() {
+        isAutoRotating = false;
+        updateAutoRotateButtonState();
+        let next = (currentSlide + 1) % TOTAL_SLIDES;
+        focusOnMarket(next);
+      }
+
+      document.getElementById('btn-prev').addEventListener('click', goToPrevSlide);
+      document.getElementById('btn-next').addEventListener('click', goToNextSlide);
+
+      // PowerPoint-style Edge Navigation Buttons (Left & Right screen edges)
+      const navLeft = document.getElementById('screen-nav-left');
+      const navRight = document.getElementById('screen-nav-right');
+      if (navLeft) navLeft.addEventListener('click', goToPrevSlide);
+      if (navRight) navRight.addEventListener('click', goToNextSlide);
+
+      // Global Keyboard navigation (ArrowLeft, ArrowRight, Space, PageDown, PageUp)
+      window.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowLeft' || e.key === 'PageUp' || e.key === 'KeyA') {
+          goToPrevSlide();
+        } else if (e.key === 'ArrowRight' || e.key === 'PageDown' || e.key === 'Space' || e.key === 'KeyD') {
+          goToNextSlide();
+        }
+      });
+
+      // Mobile touch swipe gestures
+      let touchStartX = 0;
+      let touchStartY = 0;
+      window.addEventListener('touchstart', (e) => {
+        if (e.touches.length === 1) {
+          touchStartX = e.touches[0].clientX;
+          touchStartY = e.touches[0].clientY;
+        }
+      }, { passive: true });
+
+      window.addEventListener('touchend', (e) => {
+        if (e.changedTouches.length === 1) {
+          const deltaX = e.changedTouches[0].clientX - touchStartX;
+          const deltaY = e.changedTouches[0].clientY - touchStartY;
+          if (Math.abs(deltaX) > 60 && Math.abs(deltaX) > Math.abs(deltaY) * 1.5) {
+            if (deltaX > 0) {
+              goToPrevSlide();
+            } else {
+              goToNextSlide();
+            }
+          }
+        }
+      }, { passive: true });
+
+      const backToGlobeBtn = document.getElementById('btn-back-to-globe');
+      if (backToGlobeBtn) {
+        backToGlobeBtn.addEventListener('click', () => {
+          focusOnMarket(0);
+        });
+      }
+
+      const channelsPrevBtn = document.getElementById('btn-channels-prev');
+      if (channelsPrevBtn) {
+        channelsPrevBtn.addEventListener('click', () => {
+          focusOnMarket(2);
+        });
+      }
+
+      const channelsFirstBtn = document.getElementById('btn-channels-first');
+      if (channelsFirstBtn) {
+        channelsFirstBtn.addEventListener('click', () => {
+          focusOnMarket(0);
+        });
+      }
+
+      document.getElementById('btn-sound').addEventListener('click', () => {
+        soundEnabled = !soundEnabled;
+        document.getElementById('sound-icon-on').classList.toggle('hidden', !soundEnabled);
+        document.getElementById('sound-icon-off').classList.toggle('hidden', soundEnabled);
+        if (soundEnabled) playSound('toggle');
+      });
+
+      document.getElementById('btn-auto-rotate').addEventListener('click', () => {
+        isAutoRotating = !isAutoRotating;
+        updateAutoRotateButtonState();
+        playSound('toggle');
+      });
+    }
+
+    function updateAutoRotateButtonState() {
+      const label = document.getElementById('rotate-label');
+      label.textContent = isAutoRotating ? 'Xoay: Bật' : 'Xoay: Tắt';
+    }
+
+    let clock = new THREE.Clock();
 
     function animate() {
       requestAnimationFrame(animate);
 
-      // Smooth camera interpolation
-      camera.position.lerp(targetCameraPos, 0.04);
-      camera.lookAt(targetLookAt);
+      const elapsedTime = clock.getElapsedTime();
 
-      // Gentle auto-rotation
-      if (isAutoRotating && currentSlideIndex !== 3) {
-        globeGroup.rotation.y += 0.0018;
+      camera.position.lerp(targetCameraPos, 0.045);
+      currentLookAt.lerp(targetLookAt, 0.05);
+      camera.lookAt(currentLookAt);
+
+      if (isAutoRotating && !isUserDragging) {
+        globeGroup.rotation.y += 0.003;
       }
 
-      // Orbital candy ring spin
       if (candyRingGroup) {
-        candyRingGroup.rotation.z += 0.003;
+        candyRingGroup.rotation.y = elapsedTime * 0.08;
       }
 
-      // Pulse effects on pins
-      const time = performance.now() * 0.003;
-      pinObjects.forEach((p, idx) => {
-        const ring = p.userData.ringMesh;
-        const scale = 1 + Math.sin(time + idx * 2) * 0.18;
-        ring.scale.set(scale, scale, 1);
+      pinObjects.forEach((pin, idx) => {
+        const ring = pin.userData.ringMesh;
+        const candy = pin.userData.candyHead;
+        const beam = pin.userData.beamMesh;
+        const scaleVal = 1 + Math.sin(elapsedTime * 3.5 + idx) * 0.28;
+        ring.scale.set(scaleVal, scaleVal, 1);
+        beam.material.opacity = 0.4 + Math.sin(elapsedTime * 4 + idx) * 0.2;
+        candy.rotation.y = Math.sin(elapsedTime * 2 + idx) * 0.3;
       });
 
       renderer.render(scene, camera);
@@ -1084,8 +1400,11 @@
 
     window.onload = function () {
       initThreeScene();
-      setupEventListeners();
-      goToSlide(0, false);
+      renderSlideDots(0);
+      setupInteractionListeners();
+      setupToolbarButtons();
+
+      focusOnMarket(0, false);
       animate();
     };
   </script>
